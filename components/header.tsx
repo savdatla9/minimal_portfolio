@@ -18,15 +18,15 @@ export default function Header({ name } : { name: string }){
             </Link>
             
             <nav className="flex items-center gap-4">
-                <a className="opacity-80 hover:opacity-100" href="#about">
+                <a className="opacity-80 font-semibold hover:opacity-100" href="#about">
                     About
                 </a>
 
-                <a className="opacity-80 hover:opacity-100" href="#work">
+                <a className="opacity-80 font-semibold hover:opacity-100" href="#work">
                     Work
                 </a>
                 
-                <a className="opacity-80 hover:opacity-100" href="#contact">
+                <a className="opacity-80 font-semibold hover:opacity-100" href="#contact">
                     Contact
                 </a>
 

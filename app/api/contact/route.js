@@ -20,10 +20,10 @@ export async function GET() {
     });
 };
 
-export async function POST(request: Request)  {
+export async function POST(request)  {
     const body = await request.json();
 
-    function isEmail(value: string) {
+    function isEmail(value) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(value).trim());
     };
 

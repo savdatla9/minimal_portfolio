@@ -21,7 +21,7 @@ export default function Dashboard(){
     };
 
     const handleClose = (message: any) => {
-        if(message.id){
+        if(message){
             const data = {
                 name: message.name,
                 email: message.email,
@@ -29,7 +29,9 @@ export default function Dashboard(){
                 isDone: true,
             };
 
-            axios.put('/api/contact/'+message.id, data, {
+            console.log(message);
+
+            axios.put(`/api/contact/${message.id}`, JSON.stringify(data), {
                 headers: { "Content-Type": "application/json" },
             }).then((res) => {
                 console.log(res);
@@ -47,7 +49,7 @@ export default function Dashboard(){
             console.log('data', res.data); setLoad(false);
             setMArr(res.data.messages.filter((it: any) => it.isDone===false));
         })
-        .catch((err) => console.log(err))
+        .catch((err) => console.log(err));
     }, []);
 
     return(
@@ -78,7 +80,7 @@ export default function Dashboard(){
                                 </div>
                             </TableCell>
                         </TableRow>) : <TableRow className='border'>
-                             <TableCell colSpan={12} className='p-2 text-center'>...Mails Receiving...</TableCell>    
+                            <TableCell colSpan={12} className='p-2 text-center'>...Mails Receiving...</TableCell>    
                         </TableRow>}
                     </TableBody>
 

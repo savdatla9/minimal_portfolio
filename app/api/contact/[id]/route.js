@@ -1,23 +1,38 @@
-'use server'
-
-import { db } from "@/lib/firebase";
+// app/api/contact/[id]/route.js
 import { NextResponse } from "next/server";
-import { doc, updateDoc } from "firebase/firestore"; 
+import { db } from "@/lib/firebase";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 
-export async function PUT(req){
-  const { id } = req.query;
-
-  const gameRef = doc(db, 'messages', id);
-
-  if (!id) return NextResponse.json({ error: "Missing id", status: 400 });
-
+export async function PUT(req, { params }) {
   try {
-    const { isDone } = req.body;
+    const { id } = params || {};
 
-    await updateDoc(gameRef, { isDone });
+    console.log('id -->', id);
+    
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
 
-    return NextResponse.json({ message: 'Mail Trashed', status: 204 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Error updating game', status: 500, data: [] });
-  };
-};  
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object") {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const { isDone } = body;
+    if (typeof isDone !== "boolean") {
+      return NextResponse.json({ error: "isDone must be boolean" }, { status: 400 });
+    }
+
+    const ref = doc(db, "messages", id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      return NextResponse.json({ error: "Data not found" }, { status: 404 });
+    }
+
+    await updateDoc(ref, { isDone });
+    return NextResponse.json({ id, isDone, updated: true }, { status: 200 });
+  } catch (e) {
+    console.error("PUT /api/contact/[id] error:", e);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

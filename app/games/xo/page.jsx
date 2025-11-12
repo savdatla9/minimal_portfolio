@@ -107,7 +107,7 @@ function mediumMove(board, ai, human){
 };
 
 function Square({ value, onClick, highlight, index, disabled }){
-  return (
+  return(
     <button
       aria-label={`square ${index + 1}`}
       className={`aspect-square w-full rounded-xl border text-3xl font-semibold flex items-center justify-center select-none
@@ -319,7 +319,7 @@ export default function TicTacToeApp() {
       <div className="w-full max-w-3xl">
 
         <header className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Tic‑Tac‑Toe</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight"><a href='/games' className='underline'>🏠︎</a>&nbsp;&nbsp;Tic‑Tac‑Toe</h1>
 
           <div className="text-sm text-slate-500">React • {mode === "ai" ? `AI: ${difficulty}` : "Local PvP"}</div>
         </header>
@@ -431,4 +431,4 @@ export default function TicTacToeApp() {
       </div>
     </div>
   );
-}
+};

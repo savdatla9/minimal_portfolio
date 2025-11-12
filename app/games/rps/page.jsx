@@ -44,7 +44,9 @@ const RockPaper = () => {
         marginTop: "80px",
       }}
     >
-      <h1>🪨 • 📃 • ✂️</h1>
+      <h2 className="text-[28px] font-semibold">
+        <a href='/games' className='underline'>🏠︎</a>&nbsp;&nbsp;🪨 • 📃 • ✂️
+      </h2>
 
       <div style={{ margin: "30px 0" }}>
         {choices.map((choice) => (

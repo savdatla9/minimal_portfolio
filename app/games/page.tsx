@@ -9,7 +9,6 @@ const Games = () => {
         { title: 'Snake Game 2D', link: '/games/snake', icons: '🐍', is2d: true },
         { title: 'Whack A Hole Game', link: '/games/whackamole', icons: '🔨', is2d: true },
         { title: '2048 Puzzle Game', link: '/games/2048', icons: '🔢', is2d: true },
-        // { title: 'Guess Coin Side Game', link: '/games/cointoss', icons: '🪙', is2d: true },
         { title: 'Guess Dice Number Game', link: '/games/diceroll', icons: '🎲', is2d: true },
         { title: 'Time Reaction Game', link: '/games/timereaction', icons: '⌛', is2d: true },
     ];

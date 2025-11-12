@@ -8,6 +8,9 @@ import {
   TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 
+import { db } from '@/lib/firebase';
+import { doc, updateDoc, getDoc } from "firebase/firestore";
+
 export default function Dashboard(){
     const [mesArr, setMArr] = React.useState<any[]>([]);
     const [load, setLoad] = React.useState<boolean>(false);
@@ -20,24 +23,30 @@ export default function Dashboard(){
         return fireBaseTime.toDateString();
     };
 
-    const handleClose = (message: any) => {
+    const handleClose = async(message: any) => {
         if(message){
-            const data = {
-                name: message.name,
-                email: message.email,
-                message: message.message,
-                isDone: true,
+            const isDone = true;
+
+            const ref = doc(db, "messages", message.id);
+            const snap = await getDoc(ref);
+
+            if(!snap.exists()) {
+                return alert('Data not Found');
             };
 
-            console.log(message);
+            // console.log(ref, snap);
 
-            axios.put(`/api/contact/${message.id}`, JSON.stringify(data), {
-                headers: { "Content-Type": "application/json" },
-            }).then((res) => {
-                console.log(res);
-            }).catch((err) => {
-                console.log(err);
-            });
+            await updateDoc(ref, { isDone });
+
+            setLoad(true);
+
+            axios.get('/api/contact')
+            .then((res) => { 
+                setLoad(false);
+                setMArr(res.data.messages.filter((it: any) => it.isDone!==true));
+            })
+            .catch((err) => console.log(err));
+            // console.log('response', res);
         };
     };
 
@@ -46,8 +55,8 @@ export default function Dashboard(){
 
         axios.get('/api/contact')
         .then((res) => { 
-            console.log('data', res.data); setLoad(false);
-            setMArr(res.data.messages.filter((it: any) => it.isDone===false));
+            setLoad(false);
+            setMArr(res.data.messages.filter((it: any) => it.isDone!==true));
         })
         .catch((err) => console.log(err));
     }, []);
@@ -56,7 +65,7 @@ export default function Dashboard(){
         <div>
             <h2 className='text-center font-semibold text-2xl uppercase'>dashboard</h2>
 
-            <div className='mt-5'>
+            <div className='mt-1'>
                 <Table className='w-full'>
                     <TableHeader>
                         <TableRow>
@@ -79,12 +88,14 @@ export default function Dashboard(){
                                     <MailCheck />
                                 </div>
                             </TableCell>
-                        </TableRow>) : <TableRow className='border'>
+                        </TableRow>) : load===true ? <TableRow className='border'>
                             <TableCell colSpan={12} className='p-2 text-center'>...Mails Receiving...</TableCell>    
+                        </TableRow> : <TableRow className='border'>
+                            <TableCell colSpan={12} className='p-2 text-center'>...No New Mails...</TableCell>    
                         </TableRow>}
                     </TableBody>
 
-                    <TableCaption>List of Mails</TableCaption>
+                    <TableCaption className='text-2xl font-semibold mb-2 underline p-1 text-left'> List of Mails </TableCaption>
                 </Table>
             </div>
         </div>

@@ -12,7 +12,7 @@ export default function Header({ name } : { name: string }){
     };
 
     return(
-        <header className="flex items-center justify-between py-8">
+        <header className="flex items-center justify-between py-8 z-10">
             <Link href="/" className="font-semibold text-2xl tracking-tight">
                 {name}
             </Link>

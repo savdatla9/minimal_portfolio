@@ -145,6 +145,17 @@ export default function Page() {
 
             <Link href='/games'>View Live</Link>
           </article>
+
+          <article
+            key={projects.length+2}
+            className="rounded-2xl border border-b-4 p-4 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition"
+          >
+            <h3 className="font-medium flex flex-row justify-between"><div>3D Configurators</div> <div className="flex flex-row"><PanelsTopLeft /></div></h3>
+
+            <p className="text-sm opacity-75">Configurators for customise a Shirt, Cap & Shoe</p>
+
+            <Link href='/configurator'>View Live</Link>
+          </article>
         </div>
       </Section>
 

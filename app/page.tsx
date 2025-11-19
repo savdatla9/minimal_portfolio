@@ -35,7 +35,10 @@ export default function Page() {
     { name: 'Three Js', rate: 68, isNew: false, icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6eYPFwgeZwxd58aXqFwuhMF914MrfSPtqjQ&s' },
     { name: 'React Js & React Native', rate: 90, isNew: false, icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png' },
     { name: 'Vite', rate: 80, isNew: false, icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Vitejs-logo.svg/2078px-Vitejs-logo.svg.png' },
-    { name: 'Next Js', rate: 40, isNew: true, icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV9uzErWz9EXqZDxZ5lP9aYpMz8eK6rr5X3w&s' },
+    { name: 'Next Js', rate: 40, isNew: true, icon: 
+      // 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV9uzErWz9EXqZDxZ5lP9aYpMz8eK6rr5X3w&s' 
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwIy-mzDNwEgiWKpwsy_8CK9KSr6GEnCcpgQ&s"
+    },
     { name: 'Nuxt', rate: 38, isNew: true, icon: 'https://nuxt.com/assets/design-kit/icon-green.svg' },
     { name: 'Firebase', rate: 80, isNew: false, icon: 'https://pnghdpro.com/wp-content/themes/pnghdpro/download/social-media-and-brands/google-firebase-logo-icon-hd.png' },
     { name: 'Node Js', rate: 65, isNew: false, icon: 'https://www.freepnglogos.com/uploads/javascript-png/javascript-nodejs-logo-27.png' },

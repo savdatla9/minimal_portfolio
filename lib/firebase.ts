@@ -24,5 +24,9 @@ export const mapplsConfig = {
     api_key: 'jifsvjfjizyhvifgqxuaiinxwtklotnyejxe',
 };
 
+export const ppConfig = {
+    api_key: '396bba7ab4554037813b5a86ac42dc25',
+};
+
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const db = getFirestore(app);

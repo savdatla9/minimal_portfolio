@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from 'lucide-react';
 
-export default function Header({ name } : { name: string }){
+export default function Header({ name }){
     const { setTheme, theme } = useTheme();
 
     const handleTheme = () => {
@@ -31,9 +31,7 @@ export default function Header({ name } : { name: string }){
                 </a>
 
                 <div onClick={handleTheme}>
-                    {theme==='light' && <Sun />}
-
-                    {theme==='dark' && <Moon />}
+                    {theme==='light' ? <Moon /> : <Sun />}
                 </div>
             </nav>
         </header>

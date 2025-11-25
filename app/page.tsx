@@ -16,14 +16,14 @@ export default function Page() {
   ];
 
   const projects = [
-    { name: "Gifteria", desc: "E-commerce, For Gift products", isMobile: false, isWeb: true, link: 'https://gifteria.in/', },
-    { name: "Mee Bazaar", desc: "E-commerce + admin, For third tier cities and similar to BigBasket", isMobile: true, isWeb: true, link: '', },
-    { name: "Split Deals", desc: "Semi Social platform + admin, For purchase billing and discount splits", isMobile: false, isWeb: true, link: '', },
-    { name: "Linview", desc: "SAAS Web site for Storage/Network purpose, ", isMobile: false, isWeb: true, link: '', },
-    { name: "PlugXR Creator", desc: "React conversion & OAuth, 3D/Three.js, WebXR support", isMobile: false, isWeb: true, link: 'https://creator.plugxr.com/login', },
-    { name: "ATUM Life", desc: "E-commerce + admin; payments & deployments", isMobile: true, isWeb: true, link: 'https://atumlife.com/home', },
-    { name: "Telangana Nijam", desc: "E-newspaper; editorial admin tooling", isMobile: false, isWeb: true, link: 'https://epaper.telangananijam.com/', },
-    { name: "Sand CRM", desc: "Nuxt + ShadCN; Mappls map tracking", isMobile: false, isWeb: true, link: '', },
+    { name: "Gifteria", desc: "E-commerce, For Gift products.", isMobile: false, isWeb: true, link: 'https://gifteria.in/', },
+    { name: "Mee Bazaar", desc: "E-commerce + Admin, For third tier cities and similar to BigBasket.", isMobile: true, isWeb: true, link: '', },
+    { name: "Split Deals", desc: "Semi-Social platform + Admin, For purchase billing & discount splits.", isMobile: false, isWeb: true, link: '', },
+    { name: "Linview", desc: "SAAS Web site for Kubernetes Storage.", isMobile: false, isWeb: true, link: '', },
+    { name: "PlugXR Creator", desc: "SAAS Platform for create 3d Experience, to deploy in AR/VR, XR.", isMobile: false, isWeb: true, link: 'https://creator.plugxr.com/login', },
+    { name: "ATUM Life", desc: "E-commerce + Admin, For reusable & organic products.", isMobile: true, isWeb: true, link: 'https://atumlife.com/home', },
+    { name: "Telangana Nijam", desc: "E-newspaper - Editorial Admin + User Portal.", isMobile: false, isWeb: true, link: 'https://epaper.telangananijam.com/', },
+    { name: "Sand CRM", desc: "CRM for tracking vehicle, minerals transport.", isMobile: false, isWeb: true, link: '', },
   ];
 
   const skills = [
@@ -123,7 +123,7 @@ export default function Page() {
 
               <p className="text-sm opacity-75">{p.desc}</p>
 
-              {p.link!=='' && <Link href={p.link}>View Live</Link>}
+              {p.link!=='' && <Link href={p.link} target='_blank'>View Live</Link>}
             </article>
           ))}
 
@@ -158,6 +158,17 @@ export default function Page() {
             <p className="text-sm opacity-75">Configurators for customise a Shirt, Cap & Shoe</p>
 
             <Link href='/configurator'>View Live</Link>
+          </article>
+
+          <article
+            key={projects.length+3}
+            className="rounded-2xl border border-b-4 p-4 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition"
+          >
+            <h3 className="font-medium flex flex-row justify-between"><div>3D Editor</div> <div className="flex flex-row"><PanelsTopLeft /></div></h3>
+
+            <p className="text-sm opacity-75">3D Editor for 3d Models, 3d Text, Image, etc.</p>
+
+            <Link href='/editor3D'>View Live</Link>
           </article>
         </div>
       </Section>

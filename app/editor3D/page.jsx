@@ -1,22 +1,30 @@
 "use client";
 
-import { useState, useMemo, useRef, Suspense } from "react";
+import React, { 
+    useState, useMemo, 
+    useEffect, useRef, 
+    Suspense 
+} from "react";
 import * as THREE from 'three'; 
-import { Canvas } from "@react-three/fiber";
+import { Canvas } from '@react-three/fiber'; 
+
 import {
-    OrbitControls, TransformControls, useTexture,
-    GizmoHelper, GizmoViewport, useGLTF,
-} from '@react-three/drei'
-import { Move3d, Scale3d, Rotate3d, Plus, BoxIcon } from 'lucide-react';
+    Text3D, useGLTF, Text,
+    OrbitControls, useTexture,
+    GizmoHelper, GizmoViewport,
+    useVideoTexture, PositionalAudio,
+} from '@react-three/drei';
+import { Plus } from 'lucide-react';
 import { useTheme } from "next-themes";
+// import { GLTFExporter } from "three-stdlib";
 
 function Box({
     item,
     isSelected,
     onSelect,
-    mode,
-    onDraggingChange,
-    onChangeTransform,
+    // mode,
+    // onDraggingChange,
+    // onChangeTransform,
 }) {
     const meshRef = useRef(); 
 
@@ -62,12 +70,12 @@ function Model({
     item,
     isSelected,
     onSelect,
-    mode,
-    onDraggingChange,
-    onChangeTransform,
+    // mode,
+    // onDraggingChange,
+    // onChangeTransform,
 }) {
     const gltf = useGLTF(item.path);
-    
+
     const scene = useMemo(() => {
         const s = gltf.scene.clone(true);
         
@@ -112,11 +120,14 @@ function Image({
     item,
     isSelected,
     onSelect,
-    mode,
-    onDraggingChange,
-    onChangeTransform,
+    // mode,
+    // onDraggingChange,
+    // onChangeTransform,
 }) {
     const texture = useTexture(item.path);
+
+    const width = 4;
+    const height = 2.25; // 16:9 aspect
 
     if (!isSelected) {
         return <mesh
@@ -129,7 +140,7 @@ function Image({
             }}
             castShadow receiveShadow
         >
-            <planeGeometry args={[2, 2]} />
+            <planeGeometry args={[width, height]} />
 
             <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
         </mesh>;
@@ -146,22 +157,363 @@ function Image({
             }}
             castShadow receiveShadow
         >
-            <planeGeometry args={[2, 2]} />
+            <planeGeometry args={[width, height]} />
 
             <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
         </mesh>
     );
 };
 
+function TextT({
+    item,
+    isSelected,
+    onSelect,
+    // mode,
+    // onDraggingChange,
+    // onChangeTransform,
+}){
+    if(!isSelected){
+        <mesh
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item.id);
+            }}
+        >
+            <Text3D
+                font="/Inter_Regular.json" 
+                size={1.5} height={0.75}
+                curveSegments={12} bevelEnabled
+                bevelThickness={0.02} bevelOffset={0}
+                bevelSize={0.01} bevelSegments={3}
+                letterSpacing={-0.1} lineHeight={0.5} 
+                castShadow receiveShadow
+            >
+                {item.name}
+
+                <meshStandardMaterial color={item.color} />
+            </Text3D>
+        </mesh>
+    };
+
+    return(
+        <mesh
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item.id);
+            }}
+        >
+            <Text3D
+                font="/Inter_Regular.json" 
+                size={1.5} height={0.75}
+                curveSegments={12} bevelEnabled
+                bevelThickness={0.02} bevelOffset={0}
+                bevelSize={0.01} bevelSegments={3}
+                letterSpacing={-0.05} lineHeight={0.5} 
+                castShadow receiveShadow
+            >
+                {item.name}
+
+                <meshStandardMaterial color={item.color} />
+            </Text3D>
+        </mesh>
+    );
+};
+
+function Video({ 
+    item,
+    isSelected,
+    onSelect,
+    // mode,
+    // onDraggingChange,
+    // onChangeTransform,
+}) {
+    const texture = useVideoTexture(item.path, {
+        start: false,     // we control play/pause manually
+        muted: true,
+        loop: true,
+        crossOrigin: "anonymous",
+    });
+
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    // Control the underlying <video> element
+    useEffect(() => {
+        const videoEl = texture?.source?.data;
+        if (!videoEl) return;
+
+        if (isPlaying) {
+            videoEl.play().catch(() => {});
+        } else {
+            videoEl.pause();
+        };
+    }, [isPlaying, texture]);
+
+    // Preserve aspect ratio
+    // let planeWidth = 4;
+    // let planeHeight = 2.25; // default 16:9
+    // let aspect;
+    // const videoEl = texture?.source?.data;
+
+    // if (videoEl && videoEl.videoWidth && videoEl.videoHeight) {
+    //     aspect = videoEl.videoWidth / videoEl.videoHeight;
+
+    //     planeHeight = planeWidth / aspect; 
+    // };
+
+    if (!isSelected) {
+        return (
+            <group
+                position={item.position}
+                rotation={item.rotation}
+                scale={item.scale}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(item.id);
+                }}
+                castShadow receiveShadow
+                id={item.id}
+            >
+                {/* Video plane */}
+                <mesh castShadow receiveShadow position={[0, 1, 0]}>
+                    <planeGeometry args={[4, 2]} />
+
+                    <meshStandardMaterial
+                        map={texture} side={2} 
+                        toneMapped={false}
+                    />
+                </mesh>
+
+                {/* Play/Pause button "on" the plane (just below it) */}
+                <mesh
+                    position={[0, 1, 0.05]}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsPlaying((p) => !p);
+                    }}
+                >
+                    <Text
+                        fontSize={0.25}
+                        position={[0, 0, 0.01]}
+                        anchorX="center"
+                        anchorY="middle"
+                        color="#ffb900"
+                    >
+                        {isPlaying ? "⏸️" : "▶️"}
+                    </Text>
+                </mesh>
+            </group>
+        );
+    };
+
+    return (
+        <group
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item.id);
+            }}
+            castShadow receiveShadow
+            id={item.id}
+        >
+            {/* Video plane */}
+            <mesh castShadow receiveShadow position={[0, 1, 0]}>
+                <planeGeometry args={[4, 2]} />
+
+                <meshStandardMaterial
+                    map={texture} side={2} 
+                    toneMapped={false}
+                />
+            </mesh>
+
+            {/* Play/Pause button "on" the plane (just below it) */}
+            <mesh
+                position={[0, 1, 0.05]}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    setIsPlaying((p) => !p);
+                }}
+            >
+                <Text
+                    fontSize={0.25}
+                    position={[0, 0, 0.01]}
+                    anchorX="center"
+                    anchorY="middle"
+                    color="#ffb900"
+                >
+                    {isPlaying ? "⏸️" : "▶️"}
+                </Text>
+            </mesh>
+        </group>
+    );
+};
+
+function Audio({
+    item,
+    isSelected,
+    onSelect,
+    // mode,
+    // onDraggingChange,
+    // onChangeTransform,
+}){
+    if (!item.path) return null;
+
+    const playRef = useRef(null);
+
+    // A small glowing sphere as the sound source
+    if(!isSelected){   
+        return <group 
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item.id);
+            }}
+            castShadow receiveShadow
+            id={item.id}
+        >
+            <mesh position={[2, 1, 0]} castShadow>
+                <planeGeometry args={[4, 2]} />
+
+                <meshStandardMaterial
+                    color="orange"
+                    emissive="orange"
+                    emissiveIntensity={0.8}
+                />
+
+                {/* Positional audio attached to this mesh */}
+                <PositionalAudio ref={playRef} url={item.path} distance={6} loop autoplay />
+            </mesh>
+
+            {/* <mesh
+                position={[0, 1, 0.05]}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    playRef.current.isPlaying ? playRef.current.pause() : playRef.current.play();
+                }}
+            >
+                <Text
+                    fontSize={0.25}
+                    position={[0, 0, 0.01]}
+                    anchorX="center"
+                    anchorY="middle"
+                    color="#ffb900"
+                >
+                    {playRef.current.isPlaying ? "⏸️" : "▶️"}
+                </Text>
+            </mesh> */}
+        </group>
+    };
+
+    return (
+        <group 
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item.id);
+            }}
+            castShadow receiveShadow
+            id={item.id}
+        >
+            <mesh position={[2, 1, 0]} castShadow>
+                <planeGeometry args={[4, 2]} />
+
+                <meshStandardMaterial
+                    color="orange"
+                    emissive="orange"
+                    emissiveIntensity={0.8}
+                />
+
+                {/* Positional audio attached to this mesh */}
+                <PositionalAudio ref={playRef} url={item.path} distance={6} loop autoplay />
+            </mesh>
+
+            {/* <mesh
+                position={[0, 1, 0.05]}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    playRef.current.isPlaying ? playRef.current.pause() : playRef.current.play();
+                }}
+            >
+                <Text
+                    fontSize={0.25}
+                    position={[0, 0, 0.01]}
+                    anchorX="center"
+                    anchorY="middle"
+                    color="#ffb900"
+                >
+                    {playRef.current.play ? "⏸️" : "▶️"}
+                </Text>
+            </mesh> */}
+        </group>
+    );
+};
+
+// function ExportHelper({ registerExporter }) {
+//     const { scene } = useThree();
+
+//     React.useEffect(() => {
+//         if (!registerExporter) return;
+
+//         // expose a function that will export the current scene
+//         const exportFn = () => {
+//             const exporter = new GLTFExporter();
+
+//             exporter.parse(
+//                 scene,
+//                 (gltf) => {
+//                     let blob;
+//                     let filename;
+
+//                     if (gltf instanceof ArrayBuffer) {
+//                         // binary .glb
+//                         blob = new Blob([gltf], { type: "model/gltf-binary" });
+//                         filename = "scene.glb";
+//                     } else {
+//                         // JSON .gltf
+//                         const json = JSON.stringify(gltf, null, 2);
+//                         blob = new Blob([json], { type: "model/gltf+json" });
+//                         filename = "scene.gltf";
+//                     };
+
+//                     const url = URL.createObjectURL(blob);
+//                     const a = document.createElement("a");
+//                     a.href = url;
+//                     a.download = filename;
+//                     a.click();
+//                     URL.revokeObjectURL(url);
+//                 },
+//                 { binary: true, } // set false if you prefer .gltf + .bin
+//             );
+//         };
+
+//         // hand the export function back to the parent (page) via callback
+//         registerExporter(exportFn);
+//     }, [scene, registerExporter]);
+
+//     return null;
+// };
+
 function Scene({
     objects,
     selectedId,
     setSelectedId,
-    transformMode,
-    onTransformChange,
-    theme,
+    // transformMode,
+    // onTransformChange,
+    theme, 
+    // exportRef,
 }) {
-    const [isDragging, setIsDragging] = useState(false);
+    // const [isDragging, setIsDragging] = useState(false);
 
     const selected = useMemo(
         () => objects.find((o) => o.id === selectedId),
@@ -184,42 +536,56 @@ function Scene({
             <fog attach="fog" args={theme==='dark'?['#0a0a0a', 15, 22.5]:['white', 15, 22.5]} />
 
             {/* Grid */}
-            <gridHelper args={theme==='dark' ? [50, 50, 'dodgerblue', 'lightskyblue'] : [50, 50, 'dimgrey', 'gainsboro']} />
+            <gridHelper args={theme==='dark' ? [50, 50, 'dodgerblue', 'skyblue'] : [50, 50, 'dimgrey', 'gainsboro']} />
+
+            {/* Shadow */}
+            <mesh 
+                position={[0, -0.05, 0]} receiveShadow
+                rotation={[Math.PI/2, 0, 0]}
+            >
+                <meshStandardMaterial side={THREE.BackSide} color={theme==='dark'?'gainsboro':'whitesmoke'} />
+
+                <planeGeometry args={[50, 50]} />
+            </mesh>
 
             {/* All objects */}
             <Suspense fallback={null}>
-                {objects.map((item) => {
-                    const commonProps = {
-                        key: item.id, item,
-                        isSelected: item.id === selectedId,
-                        onSelect: setSelectedId, mode: transformMode,
-                        onDraggingChange: setIsDragging,
-                        onChangeTransform: onTransformChange,
-                    };
+                <group>
+                 {/* ref={exportRef} */}
+                    {objects.map((item) => {
+                        const commonProps = {
+                            key: item.id, item,
+                            isSelected: item.id === selectedId,
+                            onSelect: setSelectedId, 
+                            // mode: transformMode,
+                            // onDraggingChange: setIsDragging,
+                            // onChangeTransform: onTransformChange,
+                        };
 
-                    if (item.type === "model") {
-                        return <Model {...commonProps} />
-                    };
+                        if (item.type === "model") {
+                            return <Model {...commonProps} />
+                        };
 
-                    if(item.type === "image") {
-                        return <Image {...commonProps} />
-                    };
+                        if(item.type === "image") {
+                            return <Image {...commonProps} />
+                        };
 
-                    return <Box {...commonProps} />;
-                })}
+                        if(item.type === "text") {
+                            return <TextT {...commonProps} />
+                        };
 
-                {/* Shadow */}
-                <mesh 
-                    position={[0, -0.1, 0]} receiveShadow
-                    rotation={[Math.PI/2, 0, 0]}
-                >
-                    <meshStandardMaterial side={THREE.BackSide} color={theme==='dark'?'gainsboro':'whitesmoke'} />
+                        if(item.type === "video") {
+                            return <Video {...commonProps} />
+                        };
 
-                    <planeGeometry args={[50, 50]} />
-                </mesh>
-            </Suspense>       
+                        if(item.type === "audio") {
+                            return <Audio {...commonProps} />
+                        };
 
-            {selected && <TransformControls object={selected} mode={transformMode} />}
+                        return <Box {...commonProps} />
+                    })}
+                </group>
+            </Suspense>     
 
             <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
                 <GizmoViewport 
@@ -231,7 +597,7 @@ function Scene({
             {/* Orbit controls (disabled while dragging gizmo) */}
             <OrbitControls
                 makeDefault
-                enabled={!isDragging}
+                // enabled={!isDragging}
                 target={selected ? selected.position : [0, 0, 0]}
             />
         </>
@@ -243,10 +609,13 @@ let nextId = 1;
 export default function ThreeEditorPage() {
     const [objects, setObjects] = useState([]);
     const [selectedId, setSelectedId] = useState(0);
-    const [transformMode, setTransformMode] = useState("translate"); // translate | rotate | scale
+    // const [transformMode, setTransformMode] = useState("translate"); // translate | rotate | scale
     
     const fileInputRef1 = useRef(null);
     const fileInputRef2 = useRef(null);
+    const fileInputRef3 = useRef(null);
+    const fileInputRef4 = useRef(null);
+    // const exportRef = useRef(null);
 
     const { theme } = useTheme();
 
@@ -274,6 +643,66 @@ export default function ThreeEditorPage() {
         };
         setObjects((prev) => [...prev, newBox]);
         setSelectedId(id);
+    };
+
+    function handleAddText(){
+        const id = nextId++;
+
+        const newText = {
+            id,
+            type: "text",
+            name: "Enter Text",
+            color: "#ff4500",
+            position: [0, 0.15, 0],
+            scale: [1, 1, 0.5],
+            rotation: [0, 0, 0],
+        };
+        setObjects((prev) => [...prev, newText]);
+        setSelectedId(id);
+    };
+
+    function handleUploadVideo(e){
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+
+        const id = nextId++;    
+        const newVideo = {
+            id,
+            type: "video",
+            name: file.name,
+            path: url, // blob URL
+            position: [0, 0, 0],
+            scale: [1, 1, 1],
+            rotation: [0, 0, 0],       
+        };
+        setObjects((prev) => [...prev, newVideo]);
+        setSelectedId(id);
+
+        // reset input so same file can be selected again later
+        e.target.value = "";
+    };
+
+    function handleUploadAudio(e){
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+
+        const id = nextId++;    
+        const newAudio = {
+            id,
+            type: "audio",
+            name: file.name,
+            path: url, // blob URL
+            position: [0, 0, 0],
+            scale: [1, 1, 1],
+            rotation: [0, 0, 0],       
+        };
+        setObjects((prev) => [...prev, newAudio]);
+        setSelectedId(id);
+
+        // reset input so same file can be selected again later
+        e.target.value = "";
     };
     
     function handleUploadModel(e) {
@@ -309,7 +738,7 @@ export default function ThreeEditorPage() {
             type: "image",
             name: file.name,
             path: url, // blob URL
-            position: [0, 1, 0],
+            position: [0, 0.5, 0],
             scale: [1, 1, 1],
             rotation: [0, 0, 0],
         };
@@ -328,6 +757,14 @@ export default function ThreeEditorPage() {
         fileInputRef2.current?.click();
     };
 
+    function handleUploadVideoClick() {
+        fileInputRef3.current?.click();
+    };
+
+    function handleUploadAudioClick() {
+        fileInputRef4.current?.click();
+    };
+
     function handleDeleteSelected() {
         if (!selected) return;
 
@@ -339,17 +776,25 @@ export default function ThreeEditorPage() {
         });
     };
 
-    function handleTransformChange(id, object) {
-        const position = [object.position.x, object.position.y, object.position.z];
-        const rotation = [object.rotation.x, object.rotation.y, object.rotation.z];
-        const scale = [object.scale.x, object.scale.y, object.scale.z];
+    // function handleExportScene() {
+    //     if (exportRef.current) {
+    //         exportRef.current(); // triggers GLTF export
+    //     } else {
+    //         console.warn("Exporter not ready yet");
+    //     };
+    // };
 
-        setObjects((prev) =>
-            prev.map((obj) =>
-                obj.id === id ? { ...obj, position, scale, rotation } : obj
-            )
-        );
-    };
+    // function handleTransformChange(id, object) {
+    //     const position = [object.position.x, object.position.y, object.position.z];
+    //     const rotation = [object.rotation.x, object.rotation.y, object.rotation.z];
+    //     const scale = [object.scale.x, object.scale.y, object.scale.z];
+
+    //     setObjects((prev) =>
+    //         prev.map((obj) =>
+    //             obj.id === id ? { ...obj, position, scale, rotation } : obj
+    //         )
+    //     );
+    // };
 
     return (
         <div
@@ -359,13 +804,11 @@ export default function ThreeEditorPage() {
             }}
         >
             {/* ------------------------- Left Panel (UI) ------------------------- */}
-            <div
-                style={{
-                    width: 320, padding: 16, height: "100%", overflowY: "auto",
-                    boxSizing: "border-box", borderRight: "1px solid",
-                    display: "flex", flexDirection: "column", gap: 16,
-                }}
-            >
+            <div style={{
+                width: 320, padding: 16, height: "100%", overflowY: "auto",
+                boxSizing: "border-box", borderRight: "1px solid",
+                display: "flex", flexDirection: "column", gap: 16,
+            }}>
                 <div>
                     <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, textAlign: 'center' }}>Three Js Editor</h1>
                 </div>
@@ -388,7 +831,17 @@ export default function ThreeEditorPage() {
                                     border: "1px solid", cursor: "pointer", fontSize: 12,
                                 }}
                             >
-                                <Plus size={18} absoluteStrokeWidth />&nbsp;<BoxIcon size={18} absoluteStrokeWidth />
+                                <Plus size={18} absoluteStrokeWidth />&nbsp;Box
+                            </button>
+
+                            <button
+                                onClick={handleAddText}
+                                style={{
+                                    padding: "4px 8px", borderRadius: 4, display: 'flex',
+                                    border: "1px solid", cursor: "pointer", fontSize: 12,
+                                }}
+                            >
+                                <Plus size={18} absoluteStrokeWidth />&nbsp;Text
                             </button>
                         </div>
                     </div>
@@ -422,7 +875,7 @@ export default function ThreeEditorPage() {
                                 border: "1px solid", cursor: "pointer",
                             }}
                         >
-                            Upload images
+                            Upload image
                         </button>
 
                         <input
@@ -431,12 +884,75 @@ export default function ThreeEditorPage() {
                         />
                     </div>
 
+                    {/* Upload Video */}
+                    <div style={{ marginBottom: 8 }}>
+                        <button
+                            onClick={handleUploadVideoClick}
+                            style={{
+                                width: "100%", padding: "4px 8px",
+                                borderRadius: 4, fontSize: 12,
+                                border: "1px solid", cursor: "pointer",
+                            }}
+                        >
+                            Upload video
+                        </button>
+
+                        <input
+                            ref={fileInputRef3} type="file" accept="video/*"
+                            style={{ display: "none" }} onChange={handleUploadVideo}
+                        />
+                    </div>
+
+                    {/* Upload Audio */}
+                    <div style={{ marginBottom: 8 }}>
+                        <button
+                            onClick={handleUploadAudioClick}
+                            style={{
+                                width: "100%", padding: "4px 8px",
+                                borderRadius: 4, fontSize: 12,
+                                border: "1px solid", cursor: "pointer",
+                            }}
+                        >
+                            Upload audio
+                        </button>
+
+                        <input
+                            ref={fileInputRef4} type="file" accept="audio/*"
+                            style={{ display: "none" }} onChange={handleUploadAudio}
+                        />
+                    </div>
+
+                    {/* <div style={{ marginBottom: 8 }}>
+                        <div
+                            style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                marginBottom: 6,
+                                alignItems: "center",
+                            }}
+                        >
+                            <span style={{ fontSize: 13, fontWeight: 600 }}>Scene</span>
+                        </div>
+                        <button
+                            onClick={handleExportScene}
+                            style={{
+                                padding: "4px 8px",
+                                borderRadius: 4,
+                                border: "1px solid",
+                                cursor: "pointer",
+                                fontSize: 12,
+                            }}
+                        >
+                            Export Scene (GLB)
+                        </button>
+                    </div> */}
+
                     <div style={{
                         borderRadius: 6, border: "1px solid",
                         maxHeight: 160, overflowY: "auto",
                     }}>
                         {objects.length === 0 ? (
-                            <div style={{ padding: 8, fontSize: 12 }}>
+                            <div style={{ padding: 8, fontSize: 12.5, textAlign: 'center' }}>
                                 No objects. Use buttons above to add one.
                             </div>
                         ) : objects.map((obj) => {
@@ -468,11 +984,29 @@ export default function ThreeEditorPage() {
                                     >
                                         GLB
                                     </span>} 
+
+                                    {obj.type === "text" && <span 
+                                        style={{ fontSize: 10 }}
+                                    >
+                                        text
+                                    </span>} 
                                     
                                     {obj.type === "image" && <span 
                                         style={{ fontSize: 10 }}
                                     >
                                         Img
+                                    </span>}
+
+                                    {obj.type === "video" && <span 
+                                        style={{ fontSize: 10 }}
+                                    >
+                                        Clip
+                                    </span>}
+
+                                    {obj.type === "audio" && <span 
+                                        style={{ fontSize: 10 }}
+                                    >
+                                        Song
                                     </span>}
                                 </div>
                             );
@@ -542,6 +1076,26 @@ export default function ThreeEditorPage() {
                                 </div>
                             )}
 
+                            {/* Color only for Text 3D */}
+                            {selected.type === "text" && (
+                                <div>
+                                    <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
+                                        Color
+                                    </label>
+
+                                    <input
+                                        type="color"
+                                        value={selected.color}
+                                        onChange={(e) => updateSelected({ color: e.target.value })}
+                                        style={{
+                                            width: "100%", height: 32,
+                                            padding: 0, borderRadius: 4,
+                                            border: "1px solid",
+                                        }}
+                                    />
+                                </div>
+                            )}
+
                             {/* Position inputs */}
                             <span style={{marginBottom: '-0.5rem', fontSize: 13, fontWeight: 600 }}>Position</span>
 
@@ -552,10 +1106,12 @@ export default function ThreeEditorPage() {
                                             type='number' 
                                             value={selected.position[index]} 
                                             onChange={(e) => {
-                                                const value = parseFloat(e.target.value);
-                                                const newPos = [...selected.position];
-                                                newPos[index] = value;
-                                                updateSelected({ position: newPos });
+                                                if(e.target.value){
+                                                    const value = parseFloat(e.target.value);
+                                                    const newPos = [...selected.position];
+                                                    newPos[index] = value;
+                                                    updateSelected({ position: newPos });
+                                                };
                                             }} 
                                             style={{ width: '80px', border: '1px solid', borderRadius: '5px', padding: 2 }}
                                         />
@@ -573,10 +1129,12 @@ export default function ThreeEditorPage() {
                                             type='number' 
                                             value={selected.rotation[index]} 
                                             onChange={(e) => {
-                                                const value = parseFloat(e.target.value);
-                                                const newRotate = [...selected.rotation];
-                                                newRotate[index] = value;
-                                                updateSelected({ rotation: newRotate });
+                                                if(e.target.value){
+                                                    const value = parseFloat(e.target.value);
+                                                    const newRotate = [...selected.rotation];
+                                                    newRotate[index] = value;
+                                                    updateSelected({ rotation: newRotate });
+                                                };
                                             }} 
                                             style={{ width: '80px', border: '1px solid', borderRadius: '5px', padding: 2 }}
                                         />
@@ -594,10 +1152,12 @@ export default function ThreeEditorPage() {
                                             type='number' 
                                             value={selected.scale[index]} 
                                             onChange={(e) => {
-                                                const value = parseFloat(e.target.value);
-                                                const newScale = [...selected.scale];
-                                                newScale[index] = value;
-                                                updateSelected({ scale: newScale });
+                                                if(e.target.value){
+                                                    const value = parseFloat(e.target.value);
+                                                    const newScale = [...selected.scale];
+                                                    newScale[index] = value;
+                                                    updateSelected({ scale: newScale });
+                                                };
                                             }} 
                                             style={{ width: '80px', border: '1px solid', borderRadius: '5px', padding: 2 }}
                                         />
@@ -620,7 +1180,7 @@ export default function ThreeEditorPage() {
 
             {/* -------------------------- Right Panel (3D) ------------------------ */}
             <div style={{ flex: 1 }}>
-                <div style={{
+                {/* <div style={{
                     display: 'flex', justifyContent: 'center', gap: '10px', 
                     padding: 5, position: 'absolute', zIndex: 20, top: '12vh', left: '55vw'
                 }}>
@@ -644,7 +1204,7 @@ export default function ThreeEditorPage() {
                     >
                         <Scale3d />
                     </div>
-                </div>
+                </div> */}
 
                 <Canvas
                     shadows dpr={[1, 2]}
@@ -654,10 +1214,17 @@ export default function ThreeEditorPage() {
                         objects={objects}
                         selectedId={selectedId}
                         setSelectedId={setSelectedId}
-                        transformMode={transformMode}
-                        onTransformChange={handleTransformChange}
-                        theme={theme}
+                        // transformMode={transformMode}
+                        // onTransformChange={handleTransformChange}
+                        theme={theme} 
+                        // exportRef={exportRef}
                     />
+
+                    {/* <ExportHelper
+                        registerExporter={(fn) => {
+                            exportRef.current = fn;
+                        }}
+                    /> */}
                 </Canvas>
             </div>
         </div>

@@ -1,22 +1,23 @@
 "use client";
 
-import React, { 
-    useState, useMemo, 
-    useEffect, useRef, 
-    Suspense 
+import { 
+    useState, useMemo, useRef, 
+    Suspense, useEffect, 
 } from "react";
 import * as THREE from 'three'; 
-import { Canvas } from '@react-three/fiber'; 
-
+import { Canvas, useFrame } from '@react-three/fiber'; 
+// import { EffectComposer, Bloom, ToneMapping } from '@react-three/postprocessing';
 import {
-    Text3D, useGLTF, Text,
-    OrbitControls, useTexture,
-    GizmoHelper, GizmoViewport,
-    useVideoTexture, PositionalAudio,
+    Text3D, useGLTF, Text, Grid, useCursor,
+    OrbitControls, useTexture, GizmoHelper, Outlines,
+    GizmoViewport, useVideoTexture, PositionalAudio,
 } from '@react-three/drei';
-import { Plus } from 'lucide-react';
+import { 
+    Plus, BoxIcon, ImageIcon, Film, Upload,
+    // BookImage, 
+    CassetteTape, CaseSensitive, Square, GridIcon,
+} from 'lucide-react';
 import { useTheme } from "next-themes";
-// import { GLTFExporter } from "three-stdlib";
 
 function Box({
     item,
@@ -30,7 +31,7 @@ function Box({
 
     if (!isSelected) {
         return (
-            <mesh
+            <group 
                 ref={meshRef}
                 position={item.position}
                 scale={item.scale}
@@ -39,17 +40,22 @@ function Box({
                     e.stopPropagation();
                     onSelect(item.id);
                 }}
-                castShadow receiveShadow
             >
-                <boxGeometry args={[1, 1, 1]} />
+                <mesh
+                    position={[0, 0.25, 0]}
+                    scale={0.5} castShadow receiveShadow
+                >
+                    <boxGeometry args={[1, 1, 1]} />
 
-                <meshStandardMaterial color={item.color} />
-            </mesh>
+                    <meshStandardMaterial color={item.color} />
+                </mesh>
+            </group>
+            
         );
     };
 
     return (
-        <mesh
+        <group 
             ref={meshRef}
             position={item.position}
             scale={item.scale}
@@ -58,11 +64,17 @@ function Box({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
-            castShadow receiveShadow
         >
-            <boxGeometry args={[1, 1, 1]} />
-            <meshStandardMaterial color={item.color} />
-        </mesh>
+            <mesh
+                position={[0, 0.25, 0]}
+                scale={0.5}
+                castShadow receiveShadow
+            >
+                <boxGeometry args={[1, 1, 1]} />
+
+                <meshStandardMaterial color={item.color} />
+            </mesh>
+        </group>
     );
 };
 
@@ -83,7 +95,7 @@ function Model({
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
-            }
+            };
         });
 
         return s;
@@ -92,8 +104,9 @@ function Model({
     if (!isSelected) {
         return <primitive
             object={scene}
-            position={item.position} scale={item.scale}
-            rotation={item.rotation || [0, 0, 0]}
+            position={item.position} 
+            scale={item.scale}
+            rotation={item.rotation}
             onClick={(e) => {
                 e.stopPropagation();
                 onSelect(item.id);
@@ -105,8 +118,9 @@ function Model({
     return (
         <primitive
             object={scene}
-            position={item.position} scale={item.scale}
-            rotation={item.rotation || [0, 0, 0]}
+            position={item.position} 
+            scale={item.scale}
+            rotation={item.rotation}
             onClick={(e) => {
                 e.stopPropagation();
                 onSelect(item.id);
@@ -126,11 +140,8 @@ function Image({
 }) {
     const texture = useTexture(item.path);
 
-    const width = 4;
-    const height = 2.25; // 16:9 aspect
-
     if (!isSelected) {
-        return <mesh
+        return <group
             position={item.position}
             rotation={item.rotation}
             scale={item.scale}
@@ -138,16 +149,20 @@ function Image({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
-            castShadow receiveShadow
         >
-            <planeGeometry args={[width, height]} />
+            <mesh
+                position={[0, 1.25, 0]}
+                castShadow receiveShadow
+            >
+                <planeGeometry args={[3, 2.5]} />
 
-            <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
-        </mesh>;
+                <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
+            </mesh>
+        </group>
     };
 
     return (
-        <mesh
+        <group
             position={item.position}
             rotation={item.rotation}
             scale={item.scale}
@@ -155,12 +170,16 @@ function Image({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
-            castShadow receiveShadow
         >
-            <planeGeometry args={[width, height]} />
+            <mesh
+                position={[0, 1.25, 0]}
+                castShadow receiveShadow
+            >
+                <planeGeometry args={[3, 2.5]} />
 
-            <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
-        </mesh>
+                <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
+            </mesh>
+        </group>
     );
 };
 
@@ -173,7 +192,7 @@ function TextT({
     // onChangeTransform,
 }){
     if(!isSelected){
-        <mesh
+        return <group
             position={item.position}
             rotation={item.rotation}
             scale={item.scale}
@@ -181,25 +200,31 @@ function TextT({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
-        >
-            <Text3D
-                font="/Inter_Regular.json" 
-                size={1.5} height={0.75}
-                curveSegments={12} bevelEnabled
-                bevelThickness={0.02} bevelOffset={0}
-                bevelSize={0.01} bevelSegments={3}
-                letterSpacing={-0.1} lineHeight={0.5} 
-                castShadow receiveShadow
+        > 
+            <mesh
+                position={[-0.75, 0, 0]}
+                rotation={[0, 0, 0]}
+                scale={[0.75, 0.75, 0.15]}
             >
-                {item.name}
+                <Text3D
+                    font="/Inter_Regular.json" 
+                    size={0.75} height={1.35}
+                    curveSegments={12} bevelEnabled
+                    bevelThickness={0.02} bevelOffset={0}
+                    bevelSize={0.01} bevelSegments={3}
+                    letterSpacing={0} lineHeight={0.5} 
+                    castShadow receiveShadow
+                >
+                    {item.name}
 
-                <meshStandardMaterial color={item.color} />
-            </Text3D>
-        </mesh>
+                    <meshBasicMaterial color={item.color} />
+                </Text3D>
+            </mesh>
+        </group>
     };
 
     return(
-        <mesh
+        <group
             position={item.position}
             rotation={item.rotation}
             scale={item.scale}
@@ -207,21 +232,27 @@ function TextT({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
-        >
-            <Text3D
-                font="/Inter_Regular.json" 
-                size={1.5} height={0.75}
-                curveSegments={12} bevelEnabled
-                bevelThickness={0.02} bevelOffset={0}
-                bevelSize={0.01} bevelSegments={3}
-                letterSpacing={-0.05} lineHeight={0.5} 
-                castShadow receiveShadow
+        > 
+            <mesh
+                position={[-0.75, 0, 0]}
+                rotation={[0, 0, 0]}
+                scale={[0.75, 0.75, 0.2]}
             >
-                {item.name}
+                <Text3D
+                    font="/Inter_Regular.json" 
+                    size={0.75} height={1.35}
+                    curveSegments={12} bevelEnabled
+                    bevelThickness={0.02} bevelOffset={0}
+                    bevelSize={0.01} bevelSegments={3}
+                    letterSpacing={0} lineHeight={0.5} 
+                    castShadow receiveShadow
+                >
+                    {item.name}
 
-                <meshStandardMaterial color={item.color} />
-            </Text3D>
-        </mesh>
+                    <meshBasicMaterial color={item.color} />
+                </Text3D>
+            </mesh>
+        </group>
     );
 };
 
@@ -233,12 +264,17 @@ function Video({
     // onDraggingChange,
     // onChangeTransform,
 }) {
+    if (!item.path) return null;
+
     const texture = useVideoTexture(item.path, {
-        start: false,     // we control play/pause manually
-        muted: true,
-        loop: true,
+        start: false, loop: true, 
         crossOrigin: "anonymous",
     });
+
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.x = -1;
+    texture.offset.x = 1;
 
     const [isPlaying, setIsPlaying] = useState(false);
 
@@ -248,11 +284,14 @@ function Video({
         if (!videoEl) return;
 
         if (isPlaying) {
+            videoEl.muted = false;
             videoEl.play().catch(() => {});
         } else {
             videoEl.pause();
         };
     }, [isPlaying, texture]);
+
+    const width = 3, height = 2;
 
     // Preserve aspect ratio
     // let planeWidth = 4;
@@ -267,48 +306,43 @@ function Video({
     // };
 
     if (!isSelected) {
-        return (
-            <group
-                position={item.position}
-                rotation={item.rotation}
-                scale={item.scale}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    onSelect(item.id);
-                }}
-                castShadow receiveShadow
-                id={item.id}
+        return <group
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item.id);
+            }}
+        >
+            {/* Video plane */}
+            <mesh 
+                castShadow receiveShadow 
+                position={[0, 1, 0]}
             >
-                {/* Video plane */}
-                <mesh castShadow receiveShadow position={[0, 1, 0]}>
-                    <planeGeometry args={[4, 2]} />
+                <planeGeometry args={[width, height]} />
 
-                    <meshStandardMaterial
-                        map={texture} side={2} 
-                        toneMapped={false}
-                    />
-                </mesh>
+                <meshStandardMaterial
+                    map={texture} side={2} 
+                    toneMapped={false}
+                />
+            </mesh>
 
-                {/* Play/Pause button "on" the plane (just below it) */}
-                <mesh
-                    position={[0, 1, 0.05]}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setIsPlaying((p) => !p);
-                    }}
+            {/* Play/Pause button "on" the plane (just below it) */}
+            <mesh
+                position={[0, 1, 0.05]}
+            >
+                <Text
+                    fontSize={0.25}
+                    position={[0, 0, 0.01]}
+                    anchorX="center"
+                    anchorY="middle"
+                    color="#ffb900"
                 >
-                    <Text
-                        fontSize={0.25}
-                        position={[0, 0, 0.01]}
-                        anchorX="center"
-                        anchorY="middle"
-                        color="#ffb900"
-                    >
-                        {isPlaying ? "⏸️" : "▶️"}
-                    </Text>
-                </mesh>
-            </group>
-        );
+                    "▶️"
+                </Text>
+            </mesh>
+        </group>
     };
 
     return (
@@ -320,12 +354,13 @@ function Video({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
-            castShadow receiveShadow
-            id={item.id}
         >
             {/* Video plane */}
-            <mesh castShadow receiveShadow position={[0, 1, 0]}>
-                <planeGeometry args={[4, 2]} />
+            <mesh 
+                castShadow receiveShadow 
+                position={[0, 1, 0]}
+            >
+                <planeGeometry args={[width, height]} />
 
                 <meshStandardMaterial
                     map={texture} side={2} 
@@ -365,7 +400,9 @@ function Audio({
 }){
     if (!item.path) return null;
 
-    const playRef = useRef(null);
+    const [play, setPlay] = useState(false);
+
+    const texture = useTexture("/music.png");
 
     // A small glowing sphere as the sound source
     if(!isSelected){   
@@ -377,28 +414,21 @@ function Audio({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
-            castShadow receiveShadow
-            id={item.id}
         >
-            <mesh position={[2, 1, 0]} castShadow>
-                <planeGeometry args={[4, 2]} />
+            <mesh 
+                position={[0, 0.5, 0]} 
+                castShadow receiveShadow
+            >
+                <planeGeometry args={[1, 1]} />
 
-                <meshStandardMaterial
-                    color="orange"
-                    emissive="orange"
-                    emissiveIntensity={0.8}
+                <meshBasicMaterial
+                    map={texture} side={2} 
+                    toneMapped={false}
                 />
-
-                {/* Positional audio attached to this mesh */}
-                <PositionalAudio ref={playRef} url={item.path} distance={6} loop autoplay />
             </mesh>
 
-            {/* <mesh
-                position={[0, 1, 0.05]}
-                onClick={(e) => {
-                    e.stopPropagation();
-                    playRef.current.isPlaying ? playRef.current.pause() : playRef.current.play();
-                }}
+            <mesh
+                position={[0, 0.5, 0.05]}
             >
                 <Text
                     fontSize={0.25}
@@ -407,9 +437,9 @@ function Audio({
                     anchorY="middle"
                     color="#ffb900"
                 >
-                    {playRef.current.isPlaying ? "⏸️" : "▶️"}
+                    "▶️"
                 </Text>
-            </mesh> */}
+            </mesh>
         </group>
     };
 
@@ -422,27 +452,27 @@ function Audio({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
-            castShadow receiveShadow
-            id={item.id}
         >
-            <mesh position={[2, 1, 0]} castShadow>
-                <planeGeometry args={[4, 2]} />
+            <mesh 
+                position={[0, 0.5, 0]} 
+                castShadow receiveShadow
+            >
+                <planeGeometry args={[1, 1]} />
 
-                <meshStandardMaterial
-                    color="orange"
-                    emissive="orange"
-                    emissiveIntensity={0.8}
+                <meshBasicMaterial
+                    map={texture} side={2} 
+                    toneMapped={false}
                 />
 
                 {/* Positional audio attached to this mesh */}
-                <PositionalAudio ref={playRef} url={item.path} distance={6} loop autoplay />
+                {play && <PositionalAudio url={item.path} distance={6} loop autoplay /> }
             </mesh>
 
-            {/* <mesh
-                position={[0, 1, 0.05]}
+            <mesh
+                position={[0, 0.5, 0.05]}
                 onClick={(e) => {
                     e.stopPropagation();
-                    playRef.current.isPlaying ? playRef.current.pause() : playRef.current.play();
+                    setPlay((p) => !p);
                 }}
             >
                 <Text
@@ -452,57 +482,192 @@ function Audio({
                     anchorY="middle"
                     color="#ffb900"
                 >
-                    {playRef.current.play ? "⏸️" : "▶️"}
+                    {play ? "⏸️" : "▶️"}
                 </Text>
-            </mesh> */}
+            </mesh>
         </group>
     );
 };
 
-// function ExportHelper({ registerExporter }) {
-//     const { scene } = useThree();
+// function Sprite({ 
+//     item,
+//     isSelected,
+//     onSelect,
+// }) {
+//     if(!item.path) return null;
 
-//     React.useEffect(() => {
-//         if (!registerExporter) return;
+//     // const texture = useTexture(item.path);
 
-//         // expose a function that will export the current scene
-//         const exportFn = () => {
-//             const exporter = new GLTFExporter();
+//     // if (!texture) return null;
 
-//             exporter.parse(
-//                 scene,
-//                 (gltf) => {
-//                     let blob;
-//                     let filename;
+//     // // Good defaults for sprites
+//     // texture.encoding = THREE.sRGBEncoding;
+//     // texture.needsUpdate = true;
 
-//                     if (gltf instanceof ArrayBuffer) {
-//                         // binary .glb
-//                         blob = new Blob([gltf], { type: "model/gltf-binary" });
-//                         filename = "scene.glb";
-//                     } else {
-//                         // JSON .gltf
-//                         const json = JSON.stringify(gltf, null, 2);
-//                         blob = new Blob([json], { type: "model/gltf+json" });
-//                         filename = "scene.gltf";
-//                     };
+//     const texture = useTexture(item.path);
 
-//                     const url = URL.createObjectURL(blob);
-//                     const a = document.createElement("a");
-//                     a.href = url;
-//                     a.download = filename;
-//                     a.click();
-//                     URL.revokeObjectURL(url);
-//                 },
-//                 { binary: true, } // set false if you prefer .gltf + .bin
-//             );
-//         };
+//     console.log("Sprite texture:", texture);
 
-//         // hand the export function back to the parent (page) via callback
-//         registerExporter(exportFn);
-//     }, [scene, registerExporter]);
+//     if(!isSelected){
+//         return <group
+//             position={item.position}
+//             rotation={item.rotation}
+//             scale={item.scale}
+//             onClick={(e) => {
+//                 e.stopPropagation();
+//                 onSelect(item.id);
+//             }}
+//             castShadow receiveShadow
+//             // id={key}
+//         >
+//             <sprite position={[0, 1.5, 0]}>
+//                 <spriteMaterial
+//                     map={texture}
+//                     // transparent
+//                     depthWrite={false}
+//                     sizeAttenuation={true}
+//                 />
+//             </sprite>
+//         </group>  
+//     };
 
-//     return null;
+//     return (
+//         <group
+//             position={item.position}
+//             rotation={item.rotation}
+//             scale={item.scale}
+//             onClick={(e) => {
+//                 e.stopPropagation();
+//                 onSelect(item.id);
+//             }}
+//             castShadow receiveShadow
+//             // id={key}
+//         >
+//             <sprite 
+//                 position={[0, 1.3, 0]}
+//                 scale={2.5}
+//             >
+//                 <spriteMaterial
+//                     map={texture}
+//                     // transparent
+//                     depthWrite={false}
+//                     // setValues={item.size}
+//                     sizeAttenuation={true}
+//                 />
+//             </sprite>
+
+//             <SpriteAnimator
+//                 position={[0, 1.5, 0]}
+//                 startFrame={0}
+//                 meshProps={{ frustumCulled: false, scale: item.size }}
+//                 autoPlay={true}
+//                 loop={true}
+//                 numberOfFrames={16}
+//                 textureImageURL={item.path}
+//             />
+//         </group>  
+//     );
 // };
+
+function Particles({ 
+    item, 
+    isSelected, 
+    onSelect, 
+}) {
+    const pointsRef = useRef();
+    const texture = useTexture(item.path);
+
+    // Pre-generate random positions
+    const initialPositions = useMemo(() => {
+        const positions = new Float32Array(item.count * 3);
+
+        for (let i = 0; i < item.count; i++) {
+            const i3 = i * 3;
+            positions[i3 + 0] = (Math.random() - 0.5) * item.spread; // x
+            positions[i3 + 1] = Math.random() * item.spread * 0.5;   // y (0 to spread/2)
+            positions[i3 + 2] = (Math.random() - 0.5) * item.spread; // z
+        };
+
+        return positions;
+    }, [item.count, item.spread]);
+
+    useFrame((_, delta) => {
+        if (!pointsRef.current) return;
+        const pos = pointsRef.current.geometry.attributes.position;
+        const arr = pos.array;
+
+        for(let i = 0; i < item.count; i++){
+            const i3 = i * 3;
+            // Move particles upward in Y
+            arr[i3 + 1] += delta * item.speed;
+
+            // If too high, wrap back down
+            if (arr[i3 + 1] > item.spread * 0.5) {
+                arr[i3 + 1] = 0;
+            };
+        };
+
+        pos.needsUpdate = true;
+    });
+
+    if(!isSelected){
+        return <points 
+            ref={pointsRef} 
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item.id);
+            }}
+            castShadow receiveShadow
+        >
+            <bufferGeometry>
+                <bufferAttribute
+                    attach="attributes-position"
+                    array={initialPositions}
+                    count={item.count}
+                    itemSize={3}
+                />
+            </bufferGeometry>
+            
+            <pointsMaterial
+                map={texture} size={item.size} color={item.color}
+                sizeAttenuation={true} depthWrite={false}
+                blending={THREE.AdditiveBlending}
+            />
+        </points>
+    };
+
+    return (
+        <points 
+            ref={pointsRef} 
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();
+                onSelect(item.id);
+            }}
+            castShadow receiveShadow
+        >
+            <bufferGeometry>
+                <bufferAttribute
+                    attach="attributes-position"
+                    array={initialPositions}
+                    count={item.count}
+                    itemSize={3}
+                />
+            </bufferGeometry>
+            
+            <pointsMaterial
+                map={texture} size={item.size} color={item.color}
+                sizeAttenuation={true} depthWrite={false}
+                blending={THREE.AdditiveBlending}
+            />
+        </points>
+    );
+};
 
 function Scene({
     objects,
@@ -529,23 +694,28 @@ function Scene({
                 position={[5, 10, 5]}
                 intensity={1}
                 castShadow
-                shadow-mapSize-width={1024}
-                shadow-mapSize-height={1024}
+                shadow-mapSize-width={2048}
+                shadow-mapSize-height={2048}
             />
 
-            <fog attach="fog" args={theme==='dark'?['#0a0a0a', 15, 22.5]:['white', 15, 22.5]} />
+            {/* <EffectComposer>
+                <Bloom luminanceThreshold={2} mipmapBlur />
 
-            {/* Grid */}
-            <gridHelper args={theme==='dark' ? [50, 50, 'dodgerblue', 'skyblue'] : [50, 50, 'dimgrey', 'gainsboro']} />
+                <ToneMapping />
+            </EffectComposer> */}
 
-            {/* Shadow */}
-            <mesh 
-                position={[0, -0.05, 0]} receiveShadow
-                rotation={[Math.PI/2, 0, 0]}
-            >
-                <meshStandardMaterial side={THREE.BackSide} color={theme==='dark'?'gainsboro':'whitesmoke'} />
+            <Grid 
+                position={[0, 0, 0]} args={[10, 10]} cellSize={0.5} renderOrder={-1}
+                cellThickness={1.5} cellColor={theme==='dark'?'lightskyblue':'grey'}
+                sectionSize={10} sectionThickness={1.5} sectionColor={theme==='dark'?'dodgerblue':'black'}
+                fadeDistance={30} fadeStrength={1} followCamera={false} infiniteGrid={true} 
+                side={THREE.DoubleSide}
+            />
 
-                <planeGeometry args={[50, 50]} />
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
+                <planeGeometry args={[100, 100]} />
+
+                <shadowMaterial transparent color={theme==='dark'?'white':'black'} opacity={0.4} />
             </mesh>
 
             {/* All objects */}
@@ -582,6 +752,14 @@ function Scene({
                             return <Audio {...commonProps} />
                         };
 
+                        // if(item.type === "sprite") {
+                        //     return <Sprite {...commonProps} />
+                        // };
+
+                        if(item.type === "particles") {
+                            return <Particles {...commonProps} />
+                        };
+
                         return <Box {...commonProps} />
                     })}
                 </group>
@@ -615,6 +793,8 @@ export default function ThreeEditorPage() {
     const fileInputRef2 = useRef(null);
     const fileInputRef3 = useRef(null);
     const fileInputRef4 = useRef(null);
+    // const fileInputRef5 = useRef(null);
+    const fileInputRef6 = useRef(null);
     // const exportRef = useRef(null);
 
     const { theme } = useTheme();
@@ -637,10 +817,11 @@ export default function ThreeEditorPage() {
             type: "box",
             name: `Box ${id}`,
             color: "#00aaff",
-            position: [Math.random() * 4 - 2, 0.5, Math.random() * 4 - 2],
+            position: [parseFloat((Math.random() * 4 - 2).toFixed(2)), 0, parseFloat((Math.random() * 4 - 2).toFixed(2))],
             scale: [1, 1, 1],
             rotation: [0, 0, 0],
         };
+
         setObjects((prev) => [...prev, newBox]);
         setSelectedId(id);
     };
@@ -653,8 +834,8 @@ export default function ThreeEditorPage() {
             type: "text",
             name: "Enter Text",
             color: "#ff4500",
-            position: [0, 0.15, 0],
-            scale: [1, 1, 0.5],
+            position: [0, 0, 0],
+            scale: [1, 1, 1],
             rotation: [0, 0, 0],
         };
         setObjects((prev) => [...prev, newText]);
@@ -738,11 +919,63 @@ export default function ThreeEditorPage() {
             type: "image",
             name: file.name,
             path: url, // blob URL
-            position: [0, 0.5, 0],
+            position: [0, 0, 0],
             scale: [1, 1, 1],
             rotation: [0, 0, 0],
         };
         setObjects((prev) => [...prev, newImage]);
+        setSelectedId(id);
+
+        // reset input so same file can be selected again later
+        e.target.value = "";
+    };
+
+    // function handleUploadSprite(e) {
+    //     const file = e.target.files?.[0];
+    //     if (!file) return;
+    //     const url = URL.createObjectURL(file);
+
+    //     const id = nextId++;
+    //     const newSprite = {
+    //         id,
+    //         type: "sprite",
+    //         name: file.name,
+    //         size: 1.5 ,
+    //         path: url, // blob URL
+    //         position: [0, 0, 0],
+    //         scale: [1, 1, 1],
+    //         rotation: [0, 0, 0],
+    //     };
+    //     setObjects((prev) => [...prev, newSprite]);
+    //     setSelectedId(id);
+
+    //     console.log("Added sprite:", newSprite);
+
+    //     // reset input so same file can be selected again later
+    //     e.target.value = "";
+    // };
+
+    function handleUploadParticles(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+
+        const id = nextId++;
+        const newParticle = {
+            id,
+            type: "particles",
+            name: file.name,
+            path: url, // blob URL
+            size: 0.5,
+            count: 2500,
+            spread: 100,
+            speed: 1,
+            color: "#ffffff",
+            position: [0, 0.25, 0],
+            scale: [1, 1, 1],
+            rotation: [0, 0, 0],
+        };
+        setObjects((prev) => [...prev, newParticle]);
         setSelectedId(id);
 
         // reset input so same file can be selected again later
@@ -765,6 +998,14 @@ export default function ThreeEditorPage() {
         fileInputRef4.current?.click();
     };
 
+    // function handleUploadSpriteClick() {
+    //     fileInputRef5.current?.click();
+    // };
+
+    function handleUploadParticleClick() {
+        fileInputRef6.current?.click();
+    };
+
     function handleDeleteSelected() {
         if (!selected) return;
 
@@ -775,14 +1016,6 @@ export default function ThreeEditorPage() {
             return remaining.length ? remaining[0].id : null;
         });
     };
-
-    // function handleExportScene() {
-    //     if (exportRef.current) {
-    //         exportRef.current(); // triggers GLTF export
-    //     } else {
-    //         console.warn("Exporter not ready yet");
-    //     };
-    // };
 
     // function handleTransformChange(id, object) {
     //     const position = [object.position.x, object.position.y, object.position.z];
@@ -797,131 +1030,129 @@ export default function ThreeEditorPage() {
     // };
 
     return (
-        <div
-            style={{
-                display: "flex", height: "82vh", borderRadius: 5,
-                border: '1px solid', borderBottom: '3px solid',
-            }}
-        >
+        <div className="flex h-[82vh] rounded-sm border border-b-5">
             {/* ------------------------- Left Panel (UI) ------------------------- */}
-            <div style={{
-                width: 320, padding: 16, height: "100%", overflowY: "auto",
-                boxSizing: "border-box", borderRight: "1px solid",
-                display: "flex", flexDirection: "column", gap: 16,
-            }}>
-                <div>
-                    <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4, textAlign: 'center' }}>Three Js Editor</h1>
-                </div>
+            <div className="w-[30%] p-4 h-full overflow-y-auto border-r flex flex-col gap-3.5">
+                <h1 className="text-2xl font-bold underline text-center">Three Js Editor</h1>
 
                 {/* Objects list + add buttons */}
                 <div>
-                    <div
-                        style={{
-                            display: "flex", justifyContent: "space-between",
-                            marginBottom: 8, alignItems: "center",
-                        }}
-                    >
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>Objects</span>
-                        
-                        <div style={{ display: "flex", gap: 4 }}>
+                    <div className="flex justify-between mb-1.5 underline underline-offset items-center">
+                        <span className="text-md font-bold">Objects</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 justify-center mb-2">
+                        {/* Add Box/Cube 3D */}
+                        <div>
                             <button
                                 onClick={handleAddBox}
-                                style={{
-                                    padding: "4px 8px", borderRadius: 4, display: 'flex',
-                                    border: "1px solid", cursor: "pointer", fontSize: 12,
-                                }}
+                                className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
                             >
-                                <Plus size={18} absoluteStrokeWidth />&nbsp;Box
-                            </button>
-
-                            <button
-                                onClick={handleAddText}
-                                style={{
-                                    padding: "4px 8px", borderRadius: 4, display: 'flex',
-                                    border: "1px solid", cursor: "pointer", fontSize: 12,
-                                }}
-                            >
-                                <Plus size={18} absoluteStrokeWidth />&nbsp;Text
+                                <Plus absoluteStrokeWidth />&nbsp;<Square absoluteStrokeWidth />
                             </button>
                         </div>
+
+                        {/* Add Text 3D */}
+                        <div>
+                            <button
+                                onClick={handleAddText}
+                                className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
+                            >
+                                <Plus absoluteStrokeWidth />&nbsp;<CaseSensitive absoluteStrokeWidth />
+                            </button>
+                        </div>
+
+                        {/* Upload GLB */}
+                        <div>
+                            <button
+                                onClick={handleUploadModelClick}
+                                className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
+                            >
+                                <Upload absoluteStrokeWidth />&nbsp;<BoxIcon absoluteStrokeWidth />
+                            </button>
+
+                            <input
+                                ref={fileInputRef1} type="file" accept=".glb,.gltf"
+                                style={{ display: "none" }} onChange={handleUploadModel}
+                            />
+                        </div>
+
+                        {/* Upload Image */}
+                        <div>
+                            <button
+                                onClick={handleUploadImageClick}
+                                className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
+                            >
+                                <Upload absoluteStrokeWidth />&nbsp;<ImageIcon absoluteStrokeWidth />
+                            </button>
+
+                            <input
+                                ref={fileInputRef2} type="file" accept="image/*"
+                                style={{ display: "none" }} onChange={handleUploadImage}
+                            />
+                        </div>
+
+                        {/* Upload Video */}
+                        <div>
+                            <button
+                                onClick={handleUploadVideoClick}
+                                className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
+                            >
+                                <Upload absoluteStrokeWidth />&nbsp;<Film absoluteStrokeWidth />
+                            </button>
+
+                            <input
+                                ref={fileInputRef3} type="file" accept="video/*"
+                                style={{ display: "none" }} onChange={handleUploadVideo}
+                            />
+                        </div>
+
+                        {/* Upload Audio */}
+                        <div>
+                            <button
+                                onClick={handleUploadAudioClick}
+                                className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
+                            >
+                                <Upload absoluteStrokeWidth />&nbsp;<CassetteTape absoluteStrokeWidth />
+                            </button>
+
+                            <input
+                                ref={fileInputRef4} type="file" accept="audio/*"
+                                style={{ display: "none" }} onChange={handleUploadAudio}
+                            />
+                        </div>
+
+                        {/* Upload Sprite */}
+                        {/* <div>
+                            <button
+                                onClick={handleUploadSpriteClick}
+                                className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
+                            >
+                                <Upload absoluteStrokeWidth />&nbsp;<BookImage absoluteStrokeWidth />
+                            </button>
+
+                            <input
+                                ref={fileInputRef5} type="file" accept="image/*"
+                                style={{ display: "none" }} onChange={handleUploadSprite}
+                            />
+                        </div> */}
+
+                        {/* Upload Particle Effects  */}
+                        <div>
+                            <button
+                                onClick={handleUploadParticleClick}
+                                className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
+                            >
+                                <Upload absoluteStrokeWidth />&nbsp;<GridIcon absoluteStrokeWidth />
+                            </button>
+
+                            <input
+                                ref={fileInputRef6} type="file" accept="image/png,image/jpeg"
+                                style={{ display: "none" }} onChange={handleUploadParticles}
+                            />
+                        </div>
                     </div>
-
-                    {/* Upload GLB */}
-                    <div style={{ marginBottom: 8 }}>
-                        <button
-                            onClick={handleUploadModelClick}
-                            style={{
-                                width: "100%", padding: "4px 8px",
-                                borderRadius: 4, fontSize: 12,
-                                border: "1px solid", cursor: "pointer",
-                            }}
-                        >
-                            Upload .glb / .gltf
-                        </button>
-
-                        <input
-                            ref={fileInputRef1} type="file" accept=".glb,.gltf"
-                            style={{ display: "none" }} onChange={handleUploadModel}
-                        />
-                    </div>
-
-                    {/* Upload Image */}
-                    <div style={{ marginBottom: 8 }}>
-                        <button
-                            onClick={handleUploadImageClick}
-                            style={{
-                                width: "100%", padding: "4px 8px",
-                                borderRadius: 4, fontSize: 12,
-                                border: "1px solid", cursor: "pointer",
-                            }}
-                        >
-                            Upload image
-                        </button>
-
-                        <input
-                            ref={fileInputRef2} type="file" accept="image/*"
-                            style={{ display: "none" }} onChange={handleUploadImage}
-                        />
-                    </div>
-
-                    {/* Upload Video */}
-                    <div style={{ marginBottom: 8 }}>
-                        <button
-                            onClick={handleUploadVideoClick}
-                            style={{
-                                width: "100%", padding: "4px 8px",
-                                borderRadius: 4, fontSize: 12,
-                                border: "1px solid", cursor: "pointer",
-                            }}
-                        >
-                            Upload video
-                        </button>
-
-                        <input
-                            ref={fileInputRef3} type="file" accept="video/*"
-                            style={{ display: "none" }} onChange={handleUploadVideo}
-                        />
-                    </div>
-
-                    {/* Upload Audio */}
-                    <div style={{ marginBottom: 8 }}>
-                        <button
-                            onClick={handleUploadAudioClick}
-                            style={{
-                                width: "100%", padding: "4px 8px",
-                                borderRadius: 4, fontSize: 12,
-                                border: "1px solid", cursor: "pointer",
-                            }}
-                        >
-                            Upload audio
-                        </button>
-
-                        <input
-                            ref={fileInputRef4} type="file" accept="audio/*"
-                            style={{ display: "none" }} onChange={handleUploadAudio}
-                        />
-                    </div>
-
+                
                     {/* <div style={{ marginBottom: 8 }}>
                         <div
                             style={{
@@ -947,12 +1178,9 @@ export default function ThreeEditorPage() {
                         </button>
                     </div> */}
 
-                    <div style={{
-                        borderRadius: 6, border: "1px solid",
-                        maxHeight: 160, overflowY: "auto",
-                    }}>
+                    <div className="rounded border max-h-40 overflow-y-auto">
                         {objects.length === 0 ? (
-                            <div style={{ padding: 8, fontSize: 12.5, textAlign: 'center' }}>
+                            <div className="p-4 text-md text-center">
                                 No objects. Use buttons above to add one.
                             </div>
                         ) : objects.map((obj) => {
@@ -962,51 +1190,58 @@ export default function ThreeEditorPage() {
                                 <div
                                     key={obj.id}
                                     onClick={() => setSelectedId(obj.id)}
-                                    style={{
-                                        padding: "6px 8px", fontSize: 12, cursor: "pointer", 
-                                        display: "flex", justifyContent: "space-between",
-                                        alignItems: "center", fontWeight: active ? 'bold' : 'normal',
-                                    }}
+                                    className="p-0.5 text-sm cursor-pointer flex items-center justify-between"
+                                    style={{ fontWeight: active ? 'bold' : 'normal' }}
                                 >
                                     <span>
                                         {obj.name.length<20 ? obj.name : obj.name.substring(0, 20)+' ...'}
                                     </span>
 
                                     {obj.type === "box" && <span
-                                        style={{
-                                            width: 12, height: 12, background: obj.color,
-                                            borderRadius: 999, border: "1px solid",
-                                        }}
-                                    />}
+                                    className="mr-0.5"
+                                        style={{ backgroundColor: obj.color, width: 12, height: 12 }}
+                                    >&nbsp;</span>}
 
                                     {obj.type === "model" && <span 
-                                        style={{ fontSize: 10 }}
+                                        className="text-sm"
                                     >
-                                        GLB
+                                        🧊
                                     </span>} 
 
                                     {obj.type === "text" && <span 
-                                        style={{ fontSize: 10 }}
+                                        className="text-sm"
                                     >
-                                        text
+                                        𝐓𝐭
                                     </span>} 
                                     
                                     {obj.type === "image" && <span 
-                                        style={{ fontSize: 10 }}
+                                        className="text-sm"
                                     >
-                                        Img
+                                        🖼️
                                     </span>}
 
                                     {obj.type === "video" && <span 
-                                        style={{ fontSize: 10 }}
+                                        className="text-sm"
                                     >
-                                        Clip
+                                        🎞️
                                     </span>}
 
                                     {obj.type === "audio" && <span 
-                                        style={{ fontSize: 10 }}
+                                        className="text-sm"
                                     >
-                                        Song
+                                        ♪
+                                    </span>}
+
+                                    {obj.type === "sprite" && <span 
+                                        className="text-sm"
+                                    >
+                                        🖼️
+                                    </span>}
+
+                                    {obj.type === "particles" && <span 
+                                        className="text-sm"
+                                    >
+                                        ✨
                                     </span>}
                                 </div>
                             );
@@ -1016,31 +1251,24 @@ export default function ThreeEditorPage() {
 
                 {/* Properties panel */}
                 <div>
-                    <div style={{
-                        display: "flex", justifyContent: "space-between",
-                        marginBottom: 8, alignItems: "center",
-                    }}>
-                        <span style={{ fontSize: 13, fontWeight: 600 }}>Properties</span>
+                    <div className="flex justify-between mb-2 items-center">
+                        <span className="text-sm font-bold underline">Properties</span>
 
                         <button
                             onClick={handleDeleteSelected}
                             disabled={!selected}
-                            style={{
-                                color: '#ffffff', padding: "4px 8px", borderRadius: 4, 
-                                fontWeight: 'bold', background: "red",
-                                cursor: selected ? "pointer" : "not-allowed",
-                                fontSize: 12, opacity: selected ? 1 : 0.4,
-                            }}
+                            className="text-white p-2 rounded font-bold bg-[red] text-sm"
+                            style={{ cursor: selected ? "pointer" : "not-allowed", opacity: selected ? 1 : 0.4 }}
                         >
                             Delete
                         </button>
                     </div>
 
                     {selected ? (
-                        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                        <div className="flex flex-col gap-3">
                             {/* Name */}
                             <div>
-                                <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
+                                <label className="block text-xs mb-1">
                                     Name
                                 </label>
 
@@ -1048,18 +1276,14 @@ export default function ThreeEditorPage() {
                                     type="text"
                                     value={selected.name}
                                     onChange={(e) => updateSelected({ name: e.target.value })}
-                                    style={{
-                                        width: "100%", padding: "4px 6px",
-                                        fontSize: 12, borderRadius: 4,
-                                        border: "1px solid",
-                                    }}
+                                    className="h-8 p-0 border rounded w-full text-sm"
                                 />
                             </div>
 
                             {/* Color only for boxes */}
                             {selected.type === "box" && (
                                 <div>
-                                    <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
+                                    <label className="block text-xs mb-1">
                                         Color
                                     </label>
 
@@ -1067,11 +1291,7 @@ export default function ThreeEditorPage() {
                                         type="color"
                                         value={selected.color}
                                         onChange={(e) => updateSelected({ color: e.target.value })}
-                                        style={{
-                                            width: "100%", height: 32,
-                                            padding: 0, borderRadius: 4,
-                                            border: "1px solid",
-                                        }}
+                                        className="h-8 p-0 border rounded w-full text-sm"
                                     />
                                 </div>
                             )}
@@ -1079,7 +1299,7 @@ export default function ThreeEditorPage() {
                             {/* Color only for Text 3D */}
                             {selected.type === "text" && (
                                 <div>
-                                    <label style={{ display: "block", fontSize: 12, marginBottom: 4 }}>
+                                    <label className="block text-xs mb-1">
                                         Color
                                     </label>
 
@@ -1087,19 +1307,74 @@ export default function ThreeEditorPage() {
                                         type="color"
                                         value={selected.color}
                                         onChange={(e) => updateSelected({ color: e.target.value })}
-                                        style={{
-                                            width: "100%", height: 32,
-                                            padding: 0, borderRadius: 4,
-                                            border: "1px solid",
-                                        }}
+                                        className="h-8 p-0 border rounded w-full text-sm"
                                     />
                                 </div>
                             )}
 
-                            {/* Position inputs */}
-                            <span style={{marginBottom: '-0.5rem', fontSize: 13, fontWeight: 600 }}>Position</span>
+                            {/* Size for Sprite */}
+                            {selected.type === "sprite" && (
+                                <div>
+                                    <label className="block text-xs mb-1">
+                                        Size
+                                    </label>
 
-                            <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly'}}>
+                                    <input
+                                        type="range"
+                                        min={0.5} max={5} step={0.1}
+                                        value={selected.size} className="w-full text-sm"
+                                        onChange={(e) => updateSelected({ size: parseFloat(e.target.value) })}
+                                    />
+                                </div>
+                            )}
+
+                            {/* Spead, Spped, Size, Count for Particles */}
+                            {selected.type === "particles" && (
+                                <div className="flex flex-wrap justify-between">
+                                    <div>
+                                        <label className="block text-xs mb-1">
+                                            Speed
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            max={10} step={0.25}
+                                            value={selected.speed} className="w-20 text-sm border rounded p-0.5"
+                                            onChange={(e) => updateSelected({ speed: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs mb-1">
+                                            Spread
+                                        </label>
+
+                                        <input
+                                            type="number" step={1}
+                                            value={selected.spread} className="w-20 text-sm border rounded p-0.5"
+                                            onChange={(e) => updateSelected({ spread: e.target.value })}
+                                        />
+                                    </div>
+                            
+                                    <div>
+                                        <label className="block text-xs mb-1">
+                                            Size
+                                        </label>        
+                                        
+                                        <input
+                                            type="number" 
+                                            min={0.1} max={10} step={0.1}
+                                            value={selected.size} className="w-20 text-sm border rounded p-0.5"
+                                            onChange={(e) => updateSelected({ size: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Position inputs */}
+                            <span className="text-xs font-bold -mb-1.5">Position</span>
+
+                            <div className="flex flex-wrap justify-between">
                                 {["X", "Y", "Z"].map((axis, index) => (
                                     <div key={axis}>
                                         <input 
@@ -1113,16 +1388,16 @@ export default function ThreeEditorPage() {
                                                     updateSelected({ position: newPos });
                                                 };
                                             }} 
-                                            style={{ width: '80px', border: '1px solid', borderRadius: '5px', padding: 2 }}
+                                            className="border rounded p-0.75 w-20"
                                         />
                                     </div>
                                 ))}
                             </div>
 
                             {/* Rotation inputs */}
-                            <span style={{marginBottom: '-0.5rem', fontSize: 13, fontWeight: 600 }}>Rotation </span>
+                            <span className="text-xs font-bold -mb-1.5">Rotation</span>
 
-                            <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', padding: 0}}>
+                            <div className="flex flex-wrap justify-between">
                                 {["X", "Y", "Z"].map((axis, index) => (
                                     <div key={axis}>           
                                         <input 
@@ -1136,16 +1411,16 @@ export default function ThreeEditorPage() {
                                                     updateSelected({ rotation: newRotate });
                                                 };
                                             }} 
-                                            style={{ width: '80px', border: '1px solid', borderRadius: '5px', padding: 2 }}
+                                            className="border rounded p-0.75 w-20"
                                         />
                                     </div>
                                 ))}
                             </div>
 
                             {/* Scale inputs */}
-                            <span style={{marginBottom: '-0.5rem', fontSize: 13, fontWeight: 600 }}>Scale</span>
+                            <span className="text-xs font-bold -mb-1.5">Scale</span>
 
-                            <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-evenly', padding: 0}}>
+                            <div className="flex flex-wrap justify-between">
                                 {["X", "Y", "Z"].map((axis, index) => (
                                     <div key={axis}>
                                         <input 
@@ -1159,53 +1434,27 @@ export default function ThreeEditorPage() {
                                                     updateSelected({ scale: newScale });
                                                 };
                                             }} 
-                                            style={{ width: '80px', border: '1px solid', borderRadius: '5px', padding: 2 }}
+                                            className="border rounded p-0.75 w-20"
                                         />
                                     </div>
                                 ))}
                             </div>
                         </div>
                     ) : (
-                        <div style={{ fontSize: 12 }}>
+                        <div className="text-xs">
                             No object selected.
                         </div>
                     )}
                 </div>
 
-                <div style={{ fontSize: 11, marginTop: "auto" }}>
+                <div className="text-xs mt-auto">
                     <b>Tip:</b> Drag with left mouse to orbit, right mouse to pan, scroll to
                     zoom. Use gizmo to transform the selected object.
                 </div>
             </div>
 
             {/* -------------------------- Right Panel (3D) ------------------------ */}
-            <div style={{ flex: 1 }}>
-                {/* <div style={{
-                    display: 'flex', justifyContent: 'center', gap: '10px', 
-                    padding: 5, position: 'absolute', zIndex: 20, top: '12vh', left: '55vw'
-                }}>
-                    <div 
-                        style={{border: '2px solid', borderRadius: 25, padding: '1%'}}
-                        onClick={()=>setTransformMode('translate')}
-                    >
-                        <Move3d />
-                    </div>
-
-                    <div 
-                        style={{border: '2px solid', borderRadius: 25, padding: '1%'}}
-                        onClick={()=>setTransformMode('rotate')}
-                    >
-                        <Rotate3d />
-                    </div>
-
-                    <div 
-                        style={{border: '2px solid', borderRadius: 25, padding: '1%'}}
-                        onClick={()=>setTransformMode('scale')}
-                    >
-                        <Scale3d />
-                    </div>
-                </div> */}
-
+            <div className="w-[70%] flex flex-1">
                 <Canvas
                     shadows dpr={[1, 2]}
                     camera={{ position: [6, 6, 6], fov: 45 }}
@@ -1219,12 +1468,6 @@ export default function ThreeEditorPage() {
                         theme={theme} 
                         // exportRef={exportRef}
                     />
-
-                    {/* <ExportHelper
-                        registerExporter={(fn) => {
-                            exportRef.current = fn;
-                        }}
-                    /> */}
                 </Canvas>
             </div>
         </div>

@@ -8,14 +8,14 @@ import * as THREE from 'three';
 import { Canvas, useFrame } from '@react-three/fiber'; 
 // import { EffectComposer, Bloom, ToneMapping } from '@react-three/postprocessing';
 import {
-    Text3D, useGLTF, Text, Grid, useCursor,
-    OrbitControls, useTexture, GizmoHelper, Outlines,
-    GizmoViewport, useVideoTexture, PositionalAudio,
+    Text3D, useGLTF, Text, Grid, Sprite, SpriteAnimator,
+    OrbitControls, useTexture, GizmoHelper, PivotControls,
+    GizmoViewport, useVideoTexture, PositionalAudio, Outlines,
 } from '@react-three/drei';
 import { 
-    Plus, BoxIcon, ImageIcon, Film, Upload,
-    // BookImage, 
-    CassetteTape, CaseSensitive, Square, GridIcon,
+    Plus, BoxIcon, ImageIcon, Film, 
+    Upload, Grip, CassetteTape, 
+    CaseSensitive, Square, BookImage,
 } from 'lucide-react';
 import { useTheme } from "next-themes";
 
@@ -266,9 +266,12 @@ function Video({
 }) {
     if (!item.path) return null;
 
+    const [isPlaying, setIsPlaying] = useState(false);
+
     const texture = useVideoTexture(item.path, {
-        start: false, loop: true, 
+        start: isPlaying, loop: true, 
         crossOrigin: "anonymous",
+        muted: !isPlaying, volume: 1.0,
     });
 
     texture.wrapS = THREE.RepeatWrapping;
@@ -276,15 +279,12 @@ function Video({
     texture.repeat.x = -1;
     texture.offset.x = 1;
 
-    const [isPlaying, setIsPlaying] = useState(false);
-
     // Control the underlying <video> element
     useEffect(() => {
         const videoEl = texture?.source?.data;
         if (!videoEl) return;
 
         if (isPlaying) {
-            videoEl.muted = false;
             videoEl.play().catch(() => {});
         } else {
             videoEl.pause();
@@ -304,6 +304,15 @@ function Video({
 
     //     planeHeight = planeWidth / aspect; 
     // };
+
+    // const audioListener = new THREE.AudioListener();
+    // const videoSound = new THREE.Audio(audioListener);
+    // const loader = new THREE.AudioLoader();
+    // const audioBuffer = loader.loadAsync(item.path);
+
+    // videoSound.setBuffer(audioBuffer);
+    // videoSound.setLoop(true);
+    // videoSound.setVolume(0.5);
 
     if (!isSelected) {
         return <group
@@ -339,12 +348,12 @@ function Video({
                     anchorY="middle"
                     color="#ffb900"
                 >
-                    "▶️"
+                    ▶️
                 </Text>
             </mesh>
         </group>
     };
-
+     
     return (
         <group
             position={item.position}
@@ -362,10 +371,15 @@ function Video({
             >
                 <planeGeometry args={[width, height]} />
 
-                <meshStandardMaterial
+                <meshBasicMaterial
                     map={texture} side={2} 
                     toneMapped={false}
                 />
+
+                {/* <PositionalAudio 
+                    url={item.path} loop 
+                    distance={6} autoplay
+                /> */}
             </mesh>
 
             {/* Play/Pause button "on" the plane (just below it) */}
@@ -383,7 +397,7 @@ function Video({
                     anchorY="middle"
                     color="#ffb900"
                 >
-                    {isPlaying ? "⏸️" : "▶️"}
+                    {isPlaying ? '⏸️' : '▶️'}
                 </Text>
             </mesh>
         </group>
@@ -437,7 +451,7 @@ function Audio({
                     anchorY="middle"
                     color="#ffb900"
                 >
-                    "▶️"
+                    ▶️
                 </Text>
             </mesh>
         </group>
@@ -489,85 +503,75 @@ function Audio({
     );
 };
 
-// function Sprite({ 
-//     item,
-//     isSelected,
-//     onSelect,
-// }) {
-//     if(!item.path) return null;
+function Sprites({ 
+    item,
+    isSelected,
+    onSelect,
+}) {
+    if(!item.path) return null;
 
-//     // const texture = useTexture(item.path);
+    // Good defaults for sprites
+    const texture = useTexture(item.path);
 
-//     // if (!texture) return null;
+    useEffect(() => {
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.x = 1/item.row;
+        texture.repeat.y = 1/item.col;
+        texture.needsUpdate = true;
+    }, [item.row, item.col, texture]);
 
-//     // // Good defaults for sprites
-//     // texture.encoding = THREE.sRGBEncoding;
-//     // texture.needsUpdate = true;
+    if(!isSelected){
+        return <group
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();    
+                onSelect(item.id);
+            }}
+        >
+            <mesh position={[0, 0, 0]} scale={[1, 1, 1]}>
+                <meshBasicMaterial map={texture} />
 
-//     const texture = useTexture(item.path);
+                <planeGeometry args={[1, 1]} />
 
-//     console.log("Sprite texture:", texture);
+                <SpriteAnimator
+                    texture={texture}
+                    frames={item.frames}
+                    fps={item.fps}
+                    play={item.play}
+                    loop={item.loop}
+                />
+            </mesh>
+        </group>
+    };
 
-//     if(!isSelected){
-//         return <group
-//             position={item.position}
-//             rotation={item.rotation}
-//             scale={item.scale}
-//             onClick={(e) => {
-//                 e.stopPropagation();
-//                 onSelect(item.id);
-//             }}
-//             castShadow receiveShadow
-//             // id={key}
-//         >
-//             <sprite position={[0, 1.5, 0]}>
-//                 <spriteMaterial
-//                     map={texture}
-//                     // transparent
-//                     depthWrite={false}
-//                     sizeAttenuation={true}
-//                 />
-//             </sprite>
-//         </group>  
-//     };
+    return (
+        <group
+            position={item.position}
+            rotation={item.rotation}
+            scale={item.scale}
+            onClick={(e) => {
+                e.stopPropagation();    
+                onSelect(item.id);
+            }}
+        >
+            <mesh position={[0, 0.8, 0]} scale={[1, 1, 1]}>
+                <meshBasicMaterial map={texture} side={2} />
 
-//     return (
-//         <group
-//             position={item.position}
-//             rotation={item.rotation}
-//             scale={item.scale}
-//             onClick={(e) => {
-//                 e.stopPropagation();
-//                 onSelect(item.id);
-//             }}
-//             castShadow receiveShadow
-//             // id={key}
-//         >
-//             <sprite 
-//                 position={[0, 1.3, 0]}
-//                 scale={2.5}
-//             >
-//                 <spriteMaterial
-//                     map={texture}
-//                     // transparent
-//                     depthWrite={false}
-//                     // setValues={item.size}
-//                     sizeAttenuation={true}
-//                 />
-//             </sprite>
+                <planeGeometry args={[1.5, 1.5]} />
 
-//             <SpriteAnimator
-//                 position={[0, 1.5, 0]}
-//                 startFrame={0}
-//                 meshProps={{ frustumCulled: false, scale: item.size }}
-//                 autoPlay={true}
-//                 loop={true}
-//                 numberOfFrames={16}
-//                 textureImageURL={item.path}
-//             />
-//         </group>  
-//     );
-// };
+                <SpriteAnimator
+                    texture={texture}
+                    frames={item.frames}
+                    fps={item.fps}
+                    play={item.play}
+                    loop={item.loop}
+                />
+            </mesh>
+        </group>
+    );
+};
 
 function Particles({ 
     item, 
@@ -752,9 +756,9 @@ function Scene({
                             return <Audio {...commonProps} />
                         };
 
-                        // if(item.type === "sprite") {
-                        //     return <Sprite {...commonProps} />
-                        // };
+                        if(item.type === "sprite") {
+                            return <Sprites {...commonProps} />
+                        };
 
                         if(item.type === "particles") {
                             return <Particles {...commonProps} />
@@ -793,7 +797,7 @@ export default function ThreeEditorPage() {
     const fileInputRef2 = useRef(null);
     const fileInputRef3 = useRef(null);
     const fileInputRef4 = useRef(null);
-    // const fileInputRef5 = useRef(null);
+    const fileInputRef5 = useRef(null);
     const fileInputRef6 = useRef(null);
     // const exportRef = useRef(null);
 
@@ -930,30 +934,33 @@ export default function ThreeEditorPage() {
         e.target.value = "";
     };
 
-    // function handleUploadSprite(e) {
-    //     const file = e.target.files?.[0];
-    //     if (!file) return;
-    //     const url = URL.createObjectURL(file);
+    function handleUploadSprite(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
 
-    //     const id = nextId++;
-    //     const newSprite = {
-    //         id,
-    //         type: "sprite",
-    //         name: file.name,
-    //         size: 1.5 ,
-    //         path: url, // blob URL
-    //         position: [0, 0, 0],
-    //         scale: [1, 1, 1],
-    //         rotation: [0, 0, 0],
-    //     };
-    //     setObjects((prev) => [...prev, newSprite]);
-    //     setSelectedId(id);
+        const id = nextId++;
+        const newSprite = {
+            id,
+            type: "sprite",
+            name: file.name,
+            path: url, // blob URL
+            frames: 4, // total frames horizontally
+            fps: 8, // frames per second
+            play: true,
+            loop: true,
+            row: 2, // number of rows
+            col: 2, // number of columns
+            position: [0, 0, 0],
+            rotation: [0, 0, 0],
+            scale: [1, 1, 1],
+        };
+        setObjects((prev) => [...prev, newSprite]);
+        setSelectedId(id);
 
-    //     console.log("Added sprite:", newSprite);
-
-    //     // reset input so same file can be selected again later
-    //     e.target.value = "";
-    // };
+        // reset input so same file can be selected again later
+        e.target.value = "";
+    };
 
     function handleUploadParticles(e) {
         const file = e.target.files?.[0];
@@ -998,9 +1005,9 @@ export default function ThreeEditorPage() {
         fileInputRef4.current?.click();
     };
 
-    // function handleUploadSpriteClick() {
-    //     fileInputRef5.current?.click();
-    // };
+    function handleUploadSpriteClick() {
+        fileInputRef5.current?.click();
+    };
 
     function handleUploadParticleClick() {
         fileInputRef6.current?.click();
@@ -1123,7 +1130,7 @@ export default function ThreeEditorPage() {
                         </div>
 
                         {/* Upload Sprite */}
-                        {/* <div>
+                        <div>
                             <button
                                 onClick={handleUploadSpriteClick}
                                 className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
@@ -1135,7 +1142,7 @@ export default function ThreeEditorPage() {
                                 ref={fileInputRef5} type="file" accept="image/*"
                                 style={{ display: "none" }} onChange={handleUploadSprite}
                             />
-                        </div> */}
+                        </div>
 
                         {/* Upload Particle Effects  */}
                         <div>
@@ -1143,7 +1150,7 @@ export default function ThreeEditorPage() {
                                 onClick={handleUploadParticleClick}
                                 className="p-1.5 rounded flex items-center border cursor-pointer text-sm"
                             >
-                                <Upload absoluteStrokeWidth />&nbsp;<GridIcon absoluteStrokeWidth />
+                                <Upload absoluteStrokeWidth />&nbsp;<Grip absoluteStrokeWidth />
                             </button>
 
                             <input
@@ -1152,31 +1159,6 @@ export default function ThreeEditorPage() {
                             />
                         </div>
                     </div>
-                
-                    {/* <div style={{ marginBottom: 8 }}>
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                marginBottom: 6,
-                                alignItems: "center",
-                            }}
-                        >
-                            <span style={{ fontSize: 13, fontWeight: 600 }}>Scene</span>
-                        </div>
-                        <button
-                            onClick={handleExportScene}
-                            style={{
-                                padding: "4px 8px",
-                                borderRadius: 4,
-                                border: "1px solid",
-                                cursor: "pointer",
-                                fontSize: 12,
-                            }}
-                        >
-                            Export Scene (GLB)
-                        </button>
-                    </div> */}
 
                     <div className="rounded border max-h-40 overflow-y-auto">
                         {objects.length === 0 ? (
@@ -1268,7 +1250,7 @@ export default function ThreeEditorPage() {
                         <div className="flex flex-col gap-3">
                             {/* Name */}
                             <div>
-                                <label className="block text-xs mb-1">
+                                <label className="block text-xs font-bold mb-1">
                                     Name
                                 </label>
 
@@ -1314,17 +1296,58 @@ export default function ThreeEditorPage() {
 
                             {/* Size for Sprite */}
                             {selected.type === "sprite" && (
-                                <div>
-                                    <label className="block text-xs mb-1">
-                                        Size
-                                    </label>
+                                <div className="flex flex-wrap gap-2.5">
+                                    <div>
+                                        <label className="block text-xs font-bold mb-1">
+                                            Frames
+                                        </label>
 
-                                    <input
-                                        type="range"
-                                        min={0.5} max={5} step={0.1}
-                                        value={selected.size} className="w-full text-sm"
-                                        onChange={(e) => updateSelected({ size: parseFloat(e.target.value) })}
-                                    />
+                                        <input
+                                            type="number"
+                                            min={1} step={1} value={selected.frames} 
+                                            className="w-17 border text-sm rounded p-1"
+                                            onChange={(e) => updateSelected({ frames: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold mb-1">
+                                            F.P.S
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            min={1} step={1} value={selected.fps} 
+                                            className="w-17 border text-sm rounded p-1"
+                                            onChange={(e) => updateSelected({ fps: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold mb-1">
+                                            Rows
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            min={0} step={1} value={selected.row} 
+                                            className="w-17 border text-sm rounded p-1"
+                                            onChange={(e) => updateSelected({ row: e.target.value })}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold mb-1">
+                                            Cols
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            min={0} step={1} value={selected.col} 
+                                            className="w-16 border text-sm rounded p-1"
+                                            onChange={(e) => updateSelected({ col: e.target.value })}
+                                        />
+                                    </div>
                                 </div>
                             )}
 
@@ -1378,7 +1401,7 @@ export default function ThreeEditorPage() {
                                 {["X", "Y", "Z"].map((axis, index) => (
                                     <div key={axis}>
                                         <input 
-                                            type='number' 
+                                            type='number' min={0} step={0.1}
                                             value={selected.position[index]} 
                                             onChange={(e) => {
                                                 if(e.target.value){
@@ -1401,7 +1424,7 @@ export default function ThreeEditorPage() {
                                 {["X", "Y", "Z"].map((axis, index) => (
                                     <div key={axis}>           
                                         <input 
-                                            type='number' 
+                                            type='number' min={0} step={0.1}
                                             value={selected.rotation[index]} 
                                             onChange={(e) => {
                                                 if(e.target.value){
@@ -1424,7 +1447,7 @@ export default function ThreeEditorPage() {
                                 {["X", "Y", "Z"].map((axis, index) => (
                                     <div key={axis}>
                                         <input 
-                                            type='number' 
+                                            type='number' min={0} step={0.1} 
                                             value={selected.scale[index]} 
                                             onChange={(e) => {
                                                 if(e.target.value){
@@ -1460,13 +1483,8 @@ export default function ThreeEditorPage() {
                     camera={{ position: [6, 6, 6], fov: 45 }}
                 >
                     <Scene
-                        objects={objects}
-                        selectedId={selectedId}
-                        setSelectedId={setSelectedId}
-                        // transformMode={transformMode}
-                        // onTransformChange={handleTransformChange}
-                        theme={theme} 
-                        // exportRef={exportRef}
+                        objects={objects} selectedId={selectedId}
+                        setSelectedId={setSelectedId} theme={theme} 
                     />
                 </Canvas>
             </div>

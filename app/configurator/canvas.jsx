@@ -16,8 +16,6 @@ export const CanvasItem = ({ position = [0, 0, 2.5], fov = 25 }) => (
         <Environment files="https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/potsdamer_platz_1k.hdr" />
         
         <CameraRig>
-            <Backdrop />
-
             <Center>
                 <Shirt />
             </Center>
@@ -25,28 +23,6 @@ export const CanvasItem = ({ position = [0, 0, 2.5], fov = 25 }) => (
     </Canvas>
 );
 
-function Backdrop() {
-    const shadows = useRef();
-
-    useFrame((state, delta) => easing.dampC(shadows.current.getMesh().material.color, state.color, 0.25, delta));
-    
-    return (
-        <AccumulativeShadows
-            ref={shadows}
-            temporal
-            frames={60}
-            alphaTest={0.85}
-            scale={5}
-            resolution={2048}
-            rotation={[Math.PI / 2, 0, 0]}
-            position={[0, 0, -0.14]}
-        >
-            <RandomizedLight amount={4} radius={9} intensity={0.55 * Math.PI} ambient={0.25} position={[5, 5, -10]} />
-            
-            <RandomizedLight amount={4} radius={5} intensity={0.25 * Math.PI} ambient={0.55} position={[-5, 5, -9]} />
-        </AccumulativeShadows>
-    );
-};
 
 function CameraRig({ children }) {
     const group = useRef();
@@ -61,17 +37,19 @@ function CameraRig({ children }) {
 
 function Shirt(props) {
     const snap = useSnapshot(state);
-    const texture = useTexture(`/${snap.decal}.png`);
+    const texture = useTexture(`/${snap.shirtdecal}.png`);
     const { nodes, materials } = useGLTF('/shirt_baked_collapsed.glb');
 
-    useFrame((state, delta) => easing.dampC(materials.lambert1.color, snap.color, 0.25, delta))
+    // useFrame((state, delta) => easing.dampC(materials.lambert1.color, snap.color, 0.25, delta))
     
     return (
         <mesh castShadow geometry={nodes.T_Shirt_male.geometry} material={materials.lambert1} material-roughness={1} {...props} dispose={null}>
+            <meshStandardMaterial color={snap.color} />
+
             <Decal position={[0, 0.04, 0.15]} rotation={[0, 0, 0]} scale={0.15} map={texture} />
         </mesh>
     );
 };
 
 useGLTF.preload('/shirt_baked_collapsed.glb');
-['/react.png', '/three.png'].forEach(useTexture.preload);
+['/react.png', '/three.png', '/starbucks.png', '/onepiece.png', '/mcdonalds.png'].forEach(useTexture.preload);

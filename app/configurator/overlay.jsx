@@ -48,8 +48,8 @@ function Customizer() {
             
             <div className="decals">
                 <div className="decals--container">
-                    {snap.decals.map((decal) => (
-                        <div key={decal} className={`decal`} onClick={() => (state.decal = decal)}>
+                    {snap.shirtdecals.map((decal) => (
+                        <div key={decal} className={`decal`} onClick={() => (state.shirtdecal = decal)}>
                             <img src={decal + '_thumb.png'} alt="brand" />
                         </div>
                     ))}

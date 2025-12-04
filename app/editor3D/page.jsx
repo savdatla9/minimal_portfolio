@@ -6,18 +6,56 @@ import {
 } from "react";
 import * as THREE from 'three'; 
 import { Canvas, useFrame } from '@react-three/fiber'; 
-// import { EffectComposer, Bloom, ToneMapping } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, ToneMapping } from '@react-three/postprocessing';
 import {
-    Text3D, useGLTF, Text, Grid, Sprite, SpriteAnimator,
-    OrbitControls, useTexture, GizmoHelper, PivotControls,
-    GizmoViewport, useVideoTexture, PositionalAudio, Outlines,
+    Text3D, useGLTF, Text, Grid, Select,
+    OrbitControls, useTexture, GizmoHelper, 
+    GizmoViewport, useVideoTexture, PositionalAudio,
 } from '@react-three/drei';
 import { 
     Plus, BoxIcon, ImageIcon, Film, 
     Upload, Grip, CassetteTape, 
     CaseSensitive, Square, BookImage,
 } from 'lucide-react';
+import { PlainAnimator } from 'three-plain-animator/lib/plain-animator';
 import { useTheme } from "next-themes";
+
+// function SelectObj({ objectRef, visible=true }) {
+//     const { scene } = useThree();
+//     const helperRef = useRef(null);
+//     const boxRef = useRef(new THREE.Box3());
+
+//     // Create + cleanup helper
+//     useEffect(() => {
+//         if (!objectRef.current) return;
+
+//         const helper = new THREE.Box3Helper(boxRef.current, '#ffb900');
+//         helper.visible = visible;
+//         helperRef.current = helper;
+//         scene.add(helper);
+
+//         return () => {
+//             scene.remove(helper);
+//             helper.geometry.dispose();
+//             helper.material.dispose();
+//         };
+//     }, [scene, objectRef]);
+
+//     // React to visible prop
+//     useEffect(() => {
+//         if (helperRef.current) {
+//         helperRef.current.visible = visible;
+//         }
+//     }, [visible]);
+
+//     // Update bounding box every frame (for moving objects)
+//     useFrame(() => {
+//         if (!objectRef.current || !helperRef.current) return;
+//         boxRef.current.setFromObject(objectRef.current);
+//     });
+
+//     return null; // it's a pure helper, nothing to render as JSX
+// };
 
 function Box({
     item,
@@ -47,7 +85,7 @@ function Box({
                 >
                     <boxGeometry args={[1, 1, 1]} />
 
-                    <meshStandardMaterial color={item.color} />
+                    <meshPhysicalMaterial color={item.color} />
                 </mesh>
             </group>
             
@@ -55,26 +93,28 @@ function Box({
     };
 
     return (
-        <group 
-            ref={meshRef}
-            position={item.position}
-            scale={item.scale}
-            rotation={item.rotation || [0, 0, 0]}
-            onClick={(e) => {
-                e.stopPropagation();
-                onSelect(item.id);
-            }}
-        >
-            <mesh
-                position={[0, 0.25, 0]}
-                scale={0.5}
-                castShadow receiveShadow
+        // <PivotControls rotation={[0, -Math.PI / 2, 0]} anchor={[1, -1, -1]} scale={75} depthTest={false} fixed lineWidth={5}>
+            <group 
+                ref={meshRef}
+                position={item.position}
+                scale={item.scale}
+                rotation={item.rotation}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(item.id);
+                }}
             >
-                <boxGeometry args={[1, 1, 1]} />
+                <mesh
+                    position={[0, 0.25, 0]}
+                    scale={0.5}
+                    castShadow receiveShadow
+                >
+                    <boxGeometry args={[1, 1, 1]} />
 
-                <meshStandardMaterial color={item.color} />
-            </mesh>
-        </group>
+                    <meshPhysicalMaterial color={item.color} />
+                </mesh>
+            </group>
+        // </PivotControls>
     );
 };
 
@@ -101,7 +141,7 @@ function Model({
         return s;
     }, [gltf.scene]);
 
-    if (!isSelected) {
+    if(!isSelected){
         return <primitive
             object={scene}
             position={item.position} 
@@ -156,30 +196,32 @@ function Image({
             >
                 <planeGeometry args={[3, 2.5]} />
 
-                <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
+                <meshPhysicalMaterial map={texture} side={THREE.DoubleSide} />
             </mesh>
         </group>
     };
 
     return (
-        <group
-            position={item.position}
-            rotation={item.rotation}
-            scale={item.scale}
-            onClick={(e) => {
-                e.stopPropagation();
-                onSelect(item.id);
-            }}
-        >
-            <mesh
-                position={[0, 1.25, 0]}
-                castShadow receiveShadow
+        // <PivotControls rotation={[0, -Math.PI / 2, 0]} anchor={[1, -1, -1]} scale={75} depthTest={false} fixed lineWidth={2}>
+            <group
+                position={item.position}
+                rotation={item.rotation}
+                scale={item.scale}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(item.id);
+                }}
             >
-                <planeGeometry args={[3, 2.5]} />
+                <mesh
+                    position={[0, 1.25, 0]}
+                    castShadow receiveShadow
+                >
+                    <planeGeometry args={[3, 2.5]} />
 
-                <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
-            </mesh>
-        </group>
+                    <meshPhysicalMaterial map={texture} side={THREE.DoubleSide} />
+                </mesh>
+            </group>
+        // </PivotControls>
     );
 };
 
@@ -217,42 +259,44 @@ function TextT({
                 >
                     {item.name}
 
-                    <meshBasicMaterial color={item.color} />
+                    <meshPhysicalMaterial color={item.color} />
                 </Text3D>
             </mesh>
         </group>
     };
 
     return(
-        <group
-            position={item.position}
-            rotation={item.rotation}
-            scale={item.scale}
-            onClick={(e) => {
-                e.stopPropagation();
-                onSelect(item.id);
-            }}
-        > 
-            <mesh
-                position={[-0.75, 0, 0]}
-                rotation={[0, 0, 0]}
-                scale={[0.75, 0.75, 0.2]}
-            >
-                <Text3D
-                    font="/Inter_Regular.json" 
-                    size={0.75} height={1.35}
-                    curveSegments={12} bevelEnabled
-                    bevelThickness={0.02} bevelOffset={0}
-                    bevelSize={0.01} bevelSegments={3}
-                    letterSpacing={0} lineHeight={0.5} 
-                    castShadow receiveShadow
+        // <PivotControls rotation={[0, -Math.PI / 2, 0]} anchor={[1, -1, -1]} scale={75} depthTest={false} fixed lineWidth={2}>
+            <group
+                position={item.position}
+                rotation={item.rotation}
+                scale={item.scale}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect(item.id);
+                }}
+            > 
+                <mesh
+                    position={[-0.75, 0, 0]}
+                    rotation={[0, 0, 0]}
+                    scale={[0.75, 0.75, 0.2]}
                 >
-                    {item.name}
+                    <Text3D
+                        font="/Inter_Regular.json" 
+                        size={0.75} height={1.35}
+                        curveSegments={12} bevelEnabled
+                        bevelThickness={0.02} bevelOffset={0}
+                        bevelSize={0.01} bevelSegments={3}
+                        letterSpacing={0} lineHeight={0.5} 
+                        castShadow receiveShadow
+                    >
+                        {item.name}
 
-                    <meshBasicMaterial color={item.color} />
-                </Text3D>
-            </mesh>
-        </group>
+                        <meshPhysicalMaterial color={item.color} />
+                    </Text3D>
+                </mesh>
+            </group>
+        // </PivotControls>
     );
 };
 
@@ -291,28 +335,11 @@ function Video({
         };
     }, [isPlaying, texture]);
 
+    useFrame(() => {
+        texture.muted = false
+    });
+
     const width = 3, height = 2;
-
-    // Preserve aspect ratio
-    // let planeWidth = 4;
-    // let planeHeight = 2.25; // default 16:9
-    // let aspect;
-    // const videoEl = texture?.source?.data;
-
-    // if (videoEl && videoEl.videoWidth && videoEl.videoHeight) {
-    //     aspect = videoEl.videoWidth / videoEl.videoHeight;
-
-    //     planeHeight = planeWidth / aspect; 
-    // };
-
-    // const audioListener = new THREE.AudioListener();
-    // const videoSound = new THREE.Audio(audioListener);
-    // const loader = new THREE.AudioLoader();
-    // const audioBuffer = loader.loadAsync(item.path);
-
-    // videoSound.setBuffer(audioBuffer);
-    // videoSound.setLoop(true);
-    // videoSound.setVolume(0.5);
 
     if (!isSelected) {
         return <group
@@ -331,7 +358,7 @@ function Video({
             >
                 <planeGeometry args={[width, height]} />
 
-                <meshStandardMaterial
+                <meshPhysicalMaterial
                     map={texture} side={2} 
                     toneMapped={false}
                 />
@@ -353,54 +380,56 @@ function Video({
             </mesh>
         </group>
     };
-     
+    
     return (
-        <group
-            position={item.position}
-            rotation={item.rotation}
-            scale={item.scale}
-            onClick={(e) => {
-                e.stopPropagation();
-                onSelect(item.id);
-            }}
-        >
-            {/* Video plane */}
-            <mesh 
-                castShadow receiveShadow 
-                position={[0, 1, 0]}
-            >
-                <planeGeometry args={[width, height]} />
-
-                <meshBasicMaterial
-                    map={texture} side={2} 
-                    toneMapped={false}
-                />
-
-                {/* <PositionalAudio 
-                    url={item.path} loop 
-                    distance={6} autoplay
-                /> */}
-            </mesh>
-
-            {/* Play/Pause button "on" the plane (just below it) */}
-            <mesh
-                position={[0, 1, 0.05]}
+        // <PivotControls rotation={[0, -Math.PI / 2, 0]} anchor={[1, -1, -1]} scale={75} depthTest={false} fixed lineWidth={2}>
+            <group
+                position={item.position}
+                rotation={item.rotation}
+                scale={item.scale}
                 onClick={(e) => {
                     e.stopPropagation();
-                    setIsPlaying((p) => !p);
+                    onSelect(item.id);
                 }}
             >
-                <Text
-                    fontSize={0.25}
-                    position={[0, 0, 0.01]}
-                    anchorX="center"
-                    anchorY="middle"
-                    color="#ffb900"
+                {/* Video plane */}
+                <mesh 
+                    castShadow receiveShadow 
+                    position={[0, 1, 0]}
                 >
-                    {isPlaying ? '⏸️' : '▶️'}
-                </Text>
-            </mesh>
-        </group>
+                    <planeGeometry args={[width, height]} />
+
+                    <meshPhysicalMaterial
+                        map={texture} side={2} 
+                        toneMapped={false}
+                    />
+
+                    {/* <PositionalAudio 
+                        url={item.path} loop 
+                        distance={6} autoplay
+                    /> */}
+                </mesh>
+
+                {/* Play/Pause button "on" the plane (just below it) */}
+                <mesh
+                    position={[0, 1, 0.05]}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsPlaying((p) => !p);
+                    }}
+                >
+                    <Text
+                        fontSize={0.25}
+                        position={[0, 0, 0.01]}
+                        anchorX="center"
+                        anchorY="middle"
+                        color="#ffb900"
+                    >
+                        {isPlaying ? '⏸️' : '▶️'}
+                    </Text>
+                </mesh>
+            </group>
+        // </PivotControls>
     );
 };
 
@@ -435,7 +464,7 @@ function Audio({
             >
                 <planeGeometry args={[1, 1]} />
 
-                <meshBasicMaterial
+                <meshPhysicalMaterial
                     map={texture} side={2} 
                     toneMapped={false}
                 />
@@ -458,48 +487,55 @@ function Audio({
     };
 
     return (
-        <group 
-            position={item.position}
-            rotation={item.rotation}
-            scale={item.scale}
-            onClick={(e) => {
-                e.stopPropagation();
-                onSelect(item.id);
-            }}
-        >
-            <mesh 
-                position={[0, 0.5, 0]} 
-                castShadow receiveShadow
-            >
-                <planeGeometry args={[1, 1]} />
-
-                <meshBasicMaterial
-                    map={texture} side={2} 
-                    toneMapped={false}
-                />
-
-                {/* Positional audio attached to this mesh */}
-                {play && <PositionalAudio url={item.path} distance={6} loop autoplay /> }
-            </mesh>
-
-            <mesh
-                position={[0, 0.5, 0.05]}
+        // <PivotControls rotation={[0, -Math.PI / 2, 0]} anchor={[1, -1, -1]} scale={75} depthTest={false} fixed lineWidth={2}>
+            <group 
+                position={item.position}
+                rotation={item.rotation}
+                scale={item.scale}
                 onClick={(e) => {
                     e.stopPropagation();
-                    setPlay((p) => !p);
+                    onSelect(item.id);
                 }}
             >
-                <Text
-                    fontSize={0.25}
-                    position={[0, 0, 0.01]}
-                    anchorX="center"
-                    anchorY="middle"
-                    color="#ffb900"
+                <mesh 
+                    position={[0, 0.5, 0]} 
+                    castShadow receiveShadow
                 >
-                    {play ? "⏸️" : "▶️"}
-                </Text>
-            </mesh>
-        </group>
+                    <planeGeometry args={[1, 1]} />
+
+                    <meshPhysicalMaterial
+                        map={texture} side={2} 
+                        toneMapped={false}
+                    />
+
+                    {/* Positional audio attached to this mesh */}
+                    {play && <PositionalAudio 
+                            url={item.path} 
+                            distance={6} 
+                            loop autoplay 
+                        /> 
+                    }
+                </mesh>
+
+                <mesh
+                    position={[0, 0.5, 0.05]}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setPlay((p) => !p);
+                    }}
+                >
+                    <Text
+                        fontSize={0.25}
+                        position={[0, 0, 0.01]}
+                        anchorX="center"
+                        anchorY="middle"
+                        color="#ffb900"
+                    >
+                        {play ? "⏸️" : "▶️"}
+                    </Text>
+                </mesh>
+            </group>
+        // </PivotControls>
     );
 };
 
@@ -511,14 +547,14 @@ function Sprites({
     if(!item.path) return null;
 
     // Good defaults for sprites
-    const texture = useTexture(item.path);
+        // const spriteTexture = new  THREE.TextureLoader().load(texturePath)
+    const spriteTexture = useTexture(item.path);
+    const animator =  new  PlainAnimator(spriteTexture, item.row, item.col, item.frames, item.fps);
+    const texture = animator.init();    
 
-    useEffect(() => {
-        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        texture.repeat.x = 1/item.row;
-        texture.repeat.y = 1/item.col;
-        texture.needsUpdate = true;
-    }, [item.row, item.col, texture]);
+    useFrame(()=>{
+        animator.animate();
+    });
 
     if(!isSelected){
         return <group
@@ -529,24 +565,20 @@ function Sprites({
                 e.stopPropagation();    
                 onSelect(item.id);
             }}
+            castShadow receiveShadow
         >
-            <mesh position={[0, 0, 0]} scale={[1, 1, 1]}>
-                <meshBasicMaterial map={texture} />
+            <mesh 
+                scale={[0.1, 0.1, 0.1]}
+                position={[0, 1.26, 0]}
+            >
+                <planeGeometry args={[25, 25]} />
 
-                <planeGeometry args={[1, 1]} />
-
-                <SpriteAnimator
-                    texture={texture}
-                    frames={item.frames}
-                    fps={item.fps}
-                    play={item.play}
-                    loop={item.loop}
-                />
+                <meshPhysicalMaterial map={texture} depthTest={false} side={2} transparent />
             </mesh>
         </group>
     };
 
-    return (
+    return(
         <group
             position={item.position}
             rotation={item.rotation}
@@ -555,19 +587,15 @@ function Sprites({
                 e.stopPropagation();    
                 onSelect(item.id);
             }}
+            castShadow receiveShadow
         >
-            <mesh position={[0, 0.8, 0]} scale={[1, 1, 1]}>
-                <meshBasicMaterial map={texture} side={2} />
+            <mesh 
+                scale={[0.1, 0.1, 0.1]}
+                position={[0, 1.26, 0]}
+            >
+                <planeGeometry args={[25, 25]} />
 
-                <planeGeometry args={[1.5, 1.5]} />
-
-                <SpriteAnimator
-                    texture={texture}
-                    frames={item.frames}
-                    fps={item.fps}
-                    play={item.play}
-                    loop={item.loop}
-                />
+                <meshPhysicalMaterial map={texture} depthTest={false} side={2} transparent />
             </mesh>
         </group>
     );
@@ -586,9 +614,10 @@ function Particles({
         const positions = new Float32Array(item.count * 3);
 
         for (let i = 0; i < item.count; i++) {
-            const i3 = i * 3;
+            let i3 = i * 3;
+
             positions[i3 + 0] = (Math.random() - 0.5) * item.spread; // x
-            positions[i3 + 1] = Math.random() * item.spread * 0.5;   // y (0 to spread/2)
+            positions[i3 + 1] = Math.random() * (item.spread * 0.5);   // y (0 to spread/2)
             positions[i3 + 2] = (Math.random() - 0.5) * item.spread; // z
         };
 
@@ -597,51 +626,26 @@ function Particles({
 
     useFrame((_, delta) => {
         if (!pointsRef.current) return;
-        const pos = pointsRef.current.geometry.attributes.position;
-        const arr = pos.array;
 
-        for(let i = 0; i < item.count; i++){
-            const i3 = i * 3;
-            // Move particles upward in Y
-            arr[i3 + 1] += delta * item.speed;
+        if(isSelected){
+            const pos = pointsRef.current.geometry.attributes.position;
+            const arr = pos.array;
 
-            // If too high, wrap back down
-            if (arr[i3 + 1] > item.spread * 0.5) {
-                arr[i3 + 1] = 0;
+            for(let i = 0; i < item.count; i++){
+                const i3 = i * 3;
+
+                // Move particles upward in Y
+                arr[i3 + 1] += delta * item.speed;
+
+                // If too high, wrap back down
+                if (arr[i3 + 1] > item.spread * 0.5) {
+                    arr[i3 + 1] = 0;
+                };
             };
+
+            pos.needsUpdate = true;
         };
-
-        pos.needsUpdate = true;
     });
-
-    if(!isSelected){
-        return <points 
-            ref={pointsRef} 
-            position={item.position}
-            rotation={item.rotation}
-            scale={item.scale}
-            onClick={(e) => {
-                e.stopPropagation();
-                onSelect(item.id);
-            }}
-            castShadow receiveShadow
-        >
-            <bufferGeometry>
-                <bufferAttribute
-                    attach="attributes-position"
-                    array={initialPositions}
-                    count={item.count}
-                    itemSize={3}
-                />
-            </bufferGeometry>
-            
-            <pointsMaterial
-                map={texture} size={item.size} color={item.color}
-                sizeAttenuation={true} depthWrite={false}
-                blending={THREE.AdditiveBlending}
-            />
-        </points>
-    };
 
     return (
         <points 
@@ -666,8 +670,8 @@ function Particles({
             
             <pointsMaterial
                 map={texture} size={item.size} color={item.color}
-                sizeAttenuation={true} depthWrite={false}
-                blending={THREE.AdditiveBlending}
+                sizeAttenuation={true} depthWrite={false} 
+                opacity={1} blending={THREE.AdditiveBlending}
             />
         </points>
     );
@@ -677,10 +681,7 @@ function Scene({
     objects,
     selectedId,
     setSelectedId,
-    // transformMode,
-    // onTransformChange,
     theme, 
-    // exportRef,
 }) {
     // const [isDragging, setIsDragging] = useState(false);
 
@@ -692,39 +693,38 @@ function Scene({
     return (
         <>
             {/* Lights */}
-            <ambientLight intensity={0.5} />
+            <ambientLight intensity={.5} />
 
             <directionalLight
                 position={[5, 10, 5]}
                 intensity={1}
                 castShadow
-                shadow-mapSize-width={2048}
-                shadow-mapSize-height={2048}
+                shadow-mapSize-width={1024}
+                shadow-mapSize-height={1024}
             />
 
-            {/* <EffectComposer>
+            <EffectComposer>
                 <Bloom luminanceThreshold={2} mipmapBlur />
 
                 <ToneMapping />
-            </EffectComposer> */}
+            </EffectComposer>
 
             <Grid 
                 position={[0, 0, 0]} args={[10, 10]} cellSize={0.5} renderOrder={-1}
-                cellThickness={1.5} cellColor={theme==='dark'?'lightskyblue':'grey'}
-                sectionSize={10} sectionThickness={1.5} sectionColor={theme==='dark'?'dodgerblue':'black'}
-                fadeDistance={30} fadeStrength={1} followCamera={false} infiniteGrid={true} 
-                side={THREE.DoubleSide}
+                cellThickness={0.75} sectionSize={10} sectionThickness={1.5} side={THREE.DoubleSide}
+                fadeDistance={30} fadeStrength={1} followCamera={false} infiniteGrid={true} raycast={null}
+                cellColor={theme==='dark'?'lightskyblue':'grey'} sectionColor={theme==='dark'?'dodgerblue':'black'}
             />
 
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
                 <planeGeometry args={[100, 100]} />
 
-                <shadowMaterial transparent color={theme==='dark'?'white':'black'} opacity={0.4} />
+                <shadowMaterial transparent color={theme==='dark'?'grey':'black'} opacity={0.4} />
             </mesh>
 
             {/* All objects */}
             <Suspense fallback={null}>
-                <group>
+                <Select multiple={false} onChange={setSelectedId}>
                  {/* ref={exportRef} */}
                     {objects.map((item) => {
                         const commonProps = {
@@ -766,7 +766,7 @@ function Scene({
 
                         return <Box {...commonProps} />
                     })}
-                </group>
+                </Select>
             </Suspense>     
 
             <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
@@ -901,7 +901,7 @@ export default function ThreeEditorPage() {
             type: "model",
             name: file.name,
             path: url, // blob URL
-            position: [0, 0.5, 0],
+            position: [0, 0.15, 0],
             scale: [1, 1, 1],
             rotation: [0, 0, 0],
         };
@@ -1296,7 +1296,7 @@ export default function ThreeEditorPage() {
 
                             {/* Size for Sprite */}
                             {selected.type === "sprite" && (
-                                <div className="flex flex-wrap gap-2.5">
+                                <div className="flex flex-wrap gap-2">
                                     <div>
                                         <label className="block text-xs font-bold mb-1">
                                             Frames
@@ -1481,6 +1481,7 @@ export default function ThreeEditorPage() {
                 <Canvas
                     shadows dpr={[1, 2]}
                     camera={{ position: [6, 6, 6], fov: 45 }}
+                    style={theme==='dark' ? {background: '#0a0a0a'} : {background: '#f1f1f1'}}
                 >
                     <Scene
                         objects={objects} selectedId={selectedId}

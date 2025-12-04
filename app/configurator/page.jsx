@@ -1,24 +1,26 @@
 'use client'
 
+import { useState } from "react";
 import { useSnapshot } from "valtio";
 import { StepBack, StepForward } from 'lucide-react';
 
 import { CanvasItem } from "./canvas";
 import COverlay from './coverlay';
 import { Cap } from './ccanvas';
+import CeOverlay from './ceoverlay';
+import { Cup } from './cecanvas';
 import SOverlay from './soverlay';
 import { Shoe } from './scanvas';
 import Overlay from "./overlay";
 import { state } from "./store";
 
 import './index.css';
-import { useState } from "react";
 
 export default function configurator(){
     const snap = useSnapshot(state);
 
     const [idx, setIdx] = useState(0)
-    const cArr = ['shirt', 'cap', 'shoe'];
+    const cArr = ['shirt', 'cap', 'shoe', 'cup'];
 
     const handleBack = (indx) => {
         if(indx>0){
@@ -52,7 +54,7 @@ export default function configurator(){
                 {idx<cArr.length-1 && <p onClick={()=>handleMove(idx+1)}> <StepForward /> </p>} 
             </div>
 
-            {snap.title === 'shirt' && <div className="border border-b-3 rounded-xl h-[40vh]">
+            {snap.title === 'shirt' && <div className="border border-b-3 rounded-xl h-[40vh] bg-[#33333350] dark:bg-[#ffffff50]">
                 <CanvasItem />
 
                 <Overlay />
@@ -68,6 +70,12 @@ export default function configurator(){
                 <Cap />
 
                 <COverlay />
+            </div>}
+
+            {snap.title === 'cup' && <div className="border border-b-3 rounded-xl h-[50vh] bg-[#33333350] dark:bg-[#ffffff50]">
+                <Cup />
+
+                <CeOverlay />
             </div>}
         </>
     );

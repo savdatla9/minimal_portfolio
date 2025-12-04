@@ -5,10 +5,10 @@ import { LoaderPinwheel } from 'lucide-react';
 import axios from "axios";
 
 export default function ContactForm() {
-    const [state, setState] = useState({ name: "", email: "", message: "" });
+    const [state, setState] = useState({name: "", email: "", message: ""});
     const [status, setStatus] = useState<"idle" | "loading" | "sent" | "error">("idle");
 
-    async function onSubmit(e: React.FormEvent) {
+    async function onSubmit(e: React.FormEvent){
         e.preventDefault(); setStatus("loading");
 
         axios.post('/api/contact', {
@@ -19,11 +19,11 @@ export default function ContactForm() {
             setStatus("sent"); setState({ name: "", email: "", message: "" });
         }).catch((err)=>{
             console.log(err); setStatus('error');
-        })
+        });
     };
 
     return (
-        <form onSubmit={onSubmit} className="max-w-xl flex flex-col justify-center space-y-4">
+        <form onSubmit={onSubmit} className="sm:max-w-xl md:max-w-lg lg:max-w-[50%] flex flex-col justify-center space-y-4">
             <div className="grid gap-2">
                 <label className="text-sm opacity-75">Name</label>
 

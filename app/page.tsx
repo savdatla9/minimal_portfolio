@@ -56,14 +56,14 @@ export default function Page() {
           </h1>
 
           <p className="opacity-80">
-            <b>Front End React Js Developer</b> with 5+ years of experience in designing and developing web apps using <b>React, Vue/Nuxt, Node Js & Three Js</b>. 
-            Skilled in UI/UX development, API integration and deployment on Vercel & GoDaddy.<br /><br />
-            Hands-on with <strong>Mappls Maps, Firebase, Chart Js, Paytm Payment Gateway</strong>.
-            Strong understanding of SDLC, agile delivery and troubleshooting.
-            Certified in React Js & Three Js.<br />
+            <b>Front End React Js Developer</b> with 5+years of experience in designing and developing web apps using <b>React, Vite-React, Next Js, Typescript, Node Js & Three Js</b>.
+            Skilled in UI development, API integration <b>Axios - Rest, Next Js Server Components</b> and deployment on Vercel & GoDaddy.<br /><br />
+            Hands-on with <strong> Firebase, Chart Js, Paytm Payment Gateway, React Three Fiber & WebXR</strong>, State Management - <b>Redux, Context, Vailto & Zustand</b>.
+            Strong understanding of SDLC, agile delivery and troubleshooting. 
+            Certification in <b><a href='https://www.linkedin.com/learning/certificates/be20676aa26f443ea107c4633d9b52c60ef8142227349fd4d7a879eb3154cc61' target="_blank">React Js</a> & <a href='https://threejs-journey.com/certificate/view/13686' target="_blank">Three Js</a></b>.<br />
           </p>
           
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <a
               href="#contact"
               className="rounded-xl border-solid px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-900"
@@ -77,7 +77,7 @@ export default function Page() {
             >
               Email
             </a>
-          </div>
+          </div> */}
 
           <ul className="flex flex-row justify-center gap-9 dark:bg-[#ffffff15] w-[200px] rounded-[25px] bg-[#00000015]">
             {socials.map((s) => (

@@ -27,6 +27,8 @@
     "@types/aos": "^3.0.7",
     "@types/three": "^0.181.0",
     "@xyflow/react": "^12.9.3",
+    "@zappar/imagetraining": "^4.3.2",
+    "@zappar/zappar-react-three-fiber": "^4.2.0",
     "aos": "^2.3.4",
     "autoprefixer": "^10.4.21",
     "axios": "^1.13.2",

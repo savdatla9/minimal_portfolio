@@ -57,6 +57,34 @@ import { useTheme } from "next-themes";
 //     return null; // it's a pure helper, nothing to render as JSX
 // };
 
+async function exportGLB(root) {
+    const { GLTFExporter } = await import("three/examples/jsm/exporters/GLTFExporter.js");
+    const exporter = new GLTFExporter();
+
+    // clone & remove noExport objects (grid, floorplan underlay, etc.)
+    const clone = root.clone(true);
+    const toRemove = [];
+
+    clone.traverse((obj) => {
+        if (obj?.userData?.noExport) toRemove.push(obj);
+    });
+
+    toRemove.forEach((obj) => obj.parent?.remove(obj));
+
+    return new Promise((resolve, reject) => {
+        exporter.parse(
+            clone,
+            (res) => {
+                const arrayBuffer = res;
+                const blob = new Blob([arrayBuffer], { type: "model/gltf-binary" });
+                resolve(blob);
+            },
+            (err) => reject(err),
+            { binary: true }
+        );
+    });
+};
+
 function Box({
     item,
     isSelected,
@@ -681,7 +709,7 @@ function Scene({
     objects,
     selectedId,
     setSelectedId,
-    theme, 
+    theme, ref,
 }) {
     // const [isDragging, setIsDragging] = useState(false);
 
@@ -725,47 +753,48 @@ function Scene({
             {/* All objects */}
             <Suspense fallback={null}>
                 <Select multiple={false} onChange={setSelectedId}>
-                 {/* ref={exportRef} */}
-                    {objects.map((item) => {
-                        const commonProps = {
-                            key: item.id, item,
-                            isSelected: item.id === selectedId,
-                            onSelect: setSelectedId, 
-                            // mode: transformMode,
-                            // onDraggingChange: setIsDragging,
-                            // onChangeTransform: onTransformChange,
-                        };
+                    <group ref={ref}>
+                        {objects.map((item) => {
+                            const commonProps = {
+                                key: item.id, item,
+                                isSelected: item.id === selectedId,
+                                onSelect: setSelectedId, 
+                                // mode: transformMode,
+                                // onDraggingChange: setIsDragging,
+                                // onChangeTransform: onTransformChange,
+                            };
 
-                        if (item.type === "model") {
-                            return <Model {...commonProps} />
-                        };
+                            if (item.type === "model") {
+                                return <Model {...commonProps} />
+                            };
 
-                        if(item.type === "image") {
-                            return <Image {...commonProps} />
-                        };
+                            if(item.type === "image") {
+                                return <Image {...commonProps} />
+                            };
 
-                        if(item.type === "text") {
-                            return <TextT {...commonProps} />
-                        };
+                            if(item.type === "text") {
+                                return <TextT {...commonProps} />
+                            };
 
-                        if(item.type === "video") {
-                            return <Video {...commonProps} />
-                        };
+                            if(item.type === "video") {
+                                return <Video {...commonProps} />
+                            };
 
-                        if(item.type === "audio") {
-                            return <Audio {...commonProps} />
-                        };
+                            if(item.type === "audio") {
+                                return <Audio {...commonProps} />
+                            };
 
-                        if(item.type === "sprite") {
-                            return <Sprites {...commonProps} />
-                        };
+                            if(item.type === "sprite") {
+                                return <Sprites {...commonProps} />
+                            };
 
-                        if(item.type === "particles") {
-                            return <Particles {...commonProps} />
-                        };
+                            if(item.type === "particles") {
+                                return <Particles {...commonProps} />
+                            };
 
-                        return <Box {...commonProps} />
-                    })}
+                            return <Box {...commonProps} />
+                        })}
+                    </group>
                 </Select>
             </Suspense>     
 
@@ -800,6 +829,7 @@ export default function ThreeEditorPage() {
     const fileInputRef5 = useRef(null);
     const fileInputRef6 = useRef(null);
     // const exportRef = useRef(null);
+    const groupRef = useRef(null);
 
     const { theme } = useTheme();
 
@@ -1024,6 +1054,23 @@ export default function ThreeEditorPage() {
         });
     };
 
+    async function doExport() {
+        if (!groupRef.current) return;
+
+        try {
+            const blob = await exportGLB(groupRef.current);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "house.glb";
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error(e);
+            console.warn("Export failed. Check console.");
+        };
+    };
+
     // function handleTransformChange(id, object) {
     //     const position = [object.position.x, object.position.y, object.position.z];
     //     const rotation = [object.rotation.x, object.rotation.y, object.rotation.z];
@@ -1045,7 +1092,7 @@ export default function ThreeEditorPage() {
                 {/* Objects list + add buttons */}
                 <div>
                     <div className="flex justify-between mb-1.5 underline underline-offset items-center">
-                        <span className="text-md font-bold">Objects</span>
+                        <span className="text-md font-bold">Objects</span> <span onClick={doExport}>Export Object</span>
                     </div>
 
                     <div className="flex flex-wrap gap-2 justify-center mb-2">
@@ -1484,7 +1531,7 @@ export default function ThreeEditorPage() {
                     style={theme==='dark' ? {background: '#0a0a0a'} : {background: '#f1f1f1'}}
                 >
                     <Scene
-                        objects={objects} selectedId={selectedId}
+                        objects={objects} selectedId={selectedId} ref={groupRef}
                         setSelectedId={setSelectedId} theme={theme} 
                     />
                 </Canvas>

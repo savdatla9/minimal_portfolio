@@ -5,12 +5,13 @@ import {
     Suspense, useEffect, 
 } from "react";
 import * as THREE from 'three'; 
-import { Canvas, useFrame } from '@react-three/fiber'; 
+import { useTheme } from "next-themes";
+import { Canvas, useFrame, useThree } from '@react-three/fiber'; 
 import { EffectComposer, Bloom, ToneMapping } from '@react-three/postprocessing';
 import {
-    Text3D, useGLTF, Text, Grid, Select,
-    OrbitControls, useTexture, GizmoHelper, 
-    GizmoViewport, useVideoTexture, PositionalAudio,
+    Text3D, useGLTF, Text, Grid, Select, TransformControls,
+    OrbitControls, useTexture, GizmoHelper, GizmoViewport, 
+    useVideoTexture, PositionalAudio,
 } from '@react-three/drei';
 import { 
     Plus, BoxIcon, ImageIcon, Film, 
@@ -18,7 +19,7 @@ import {
     CaseSensitive, Square, BookImage,
 } from 'lucide-react';
 import { PlainAnimator } from 'three-plain-animator/lib/plain-animator';
-import { useTheme } from "next-themes";
+import { Move3d, Rotate3d, Scale3d  } from 'lucide-react';
 
 // function SelectObj({ objectRef, visible=true }) {
 //     const { scene } = useThree();
@@ -57,6 +58,33 @@ import { useTheme } from "next-themes";
 //     return null; // it's a pure helper, nothing to render as JSX
 // };
 
+function SelectedBoxHelper({ target }) {
+    const { scene } = useThree();
+    const helperRef = useRef(null);
+
+    useEffect(() => {
+        if (!target) return;
+
+        const helper = new THREE.BoxHelper(target, 0x22c55e); // green
+        helperRef.current = helper;
+        scene.add(helper);
+
+        return () => {
+            scene.remove(helper);
+            helper.geometry?.dispose?.();
+            helper.material?.dispose?.();
+            helperRef.current = null;
+        };
+    }, [scene, target]);
+
+    useFrame(() => {
+        if (!helperRef.current || !target) return;
+        helperRef.current.update(); // keeps box in sync while moving/rotating/scaling
+    });
+
+    return null;
+};
+
 async function exportGLB(root) {
     const { GLTFExporter } = await import("three/examples/jsm/exporters/GLTFExporter.js");
     const exporter = new GLTFExporter();
@@ -89,6 +117,7 @@ function Box({
     item,
     isSelected,
     onSelect,
+    onPick,
     // mode,
     // onDraggingChange,
     // onChangeTransform,
@@ -106,6 +135,7 @@ function Box({
                     e.stopPropagation();
                     onSelect(item.id);
                 }}
+                onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             >
                 <mesh
                     position={[0, 0.25, 0]}
@@ -131,6 +161,7 @@ function Box({
                     e.stopPropagation();
                     onSelect(item.id);
                 }}
+                onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             >
                 <mesh
                     position={[0, 0.25, 0]}
@@ -150,6 +181,7 @@ function Model({
     item,
     isSelected,
     onSelect,
+    onPick,
     // mode,
     // onDraggingChange,
     // onChangeTransform,
@@ -179,6 +211,7 @@ function Model({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
+            onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             castShadow receiveShadow
         />
     };
@@ -193,6 +226,7 @@ function Model({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
+            onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             castShadow receiveShadow
         />
     );
@@ -257,6 +291,7 @@ function TextT({
     item,
     isSelected,
     onSelect,
+    onPick,
     // mode,
     // onDraggingChange,
     // onChangeTransform,
@@ -270,6 +305,7 @@ function TextT({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
+            onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
         > 
             <mesh
                 position={[-0.75, 0, 0]}
@@ -303,6 +339,7 @@ function TextT({
                     e.stopPropagation();
                     onSelect(item.id);
                 }}
+                onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             > 
                 <mesh
                     position={[-0.75, 0, 0]}
@@ -332,6 +369,7 @@ function Video({
     item,
     isSelected,
     onSelect,
+    onPick,
     // mode,
     // onDraggingChange,
     // onChangeTransform,
@@ -378,6 +416,7 @@ function Video({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
+            onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
         >
             {/* Video plane */}
             <mesh 
@@ -419,6 +458,7 @@ function Video({
                     e.stopPropagation();
                     onSelect(item.id);
                 }}
+                onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             >
                 {/* Video plane */}
                 <mesh 
@@ -465,6 +505,7 @@ function Audio({
     item,
     isSelected,
     onSelect,
+    onPick,
     // mode,
     // onDraggingChange,
     // onChangeTransform,
@@ -485,6 +526,7 @@ function Audio({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
+            onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
         >
             <mesh 
                 position={[0, 0.5, 0]} 
@@ -524,6 +566,7 @@ function Audio({
                     e.stopPropagation();
                     onSelect(item.id);
                 }}
+                onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             >
                 <mesh 
                     position={[0, 0.5, 0]} 
@@ -571,6 +614,7 @@ function Sprites({
     item,
     isSelected,
     onSelect,
+    onPick,
 }) {
     if(!item.path) return null;
 
@@ -593,6 +637,7 @@ function Sprites({
                 e.stopPropagation();    
                 onSelect(item.id);
             }}
+            onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             castShadow receiveShadow
         >
             <mesh 
@@ -615,6 +660,7 @@ function Sprites({
                 e.stopPropagation();    
                 onSelect(item.id);
             }}
+            onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             castShadow receiveShadow
         >
             <mesh 
@@ -633,6 +679,7 @@ function Particles({
     item, 
     isSelected, 
     onSelect, 
+    onPick,
 }) {
     const pointsRef = useRef();
     const texture = useTexture(item.path);
@@ -685,6 +732,7 @@ function Particles({
                 e.stopPropagation();
                 onSelect(item.id);
             }}
+            onPointerDown={(e)=> {e.stopPropagation(); onPick(e.object)}}
             castShadow receiveShadow
         >
             <bufferGeometry>
@@ -709,14 +757,27 @@ function Scene({
     objects,
     selectedId,
     setSelectedId,
-    theme, ref,
+    theme, ref, mode
 }) {
-    // const [isDragging, setIsDragging] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
 
     const selected = useMemo(
         () => objects.find((o) => o.id === selectedId),
         [objects, selectedId]
     );
+
+    const [select, setSelect] = useState(null);
+
+    const { camera, gl } = useThree();
+
+    const tctrl = useRef(null);
+
+    // Attach TransformControls to the selected object
+    useEffect(() => {
+        if (!tctrl.current) return;
+        if (select) tctrl.current.attach(select);
+        else tctrl.current.detach();
+    }, [select]);
 
     return (
         <>
@@ -742,6 +803,7 @@ function Scene({
                 cellThickness={0.75} sectionSize={10} sectionThickness={1.5} side={THREE.DoubleSide}
                 fadeDistance={30} fadeStrength={1} followCamera={false} infiniteGrid={true} raycast={null}
                 cellColor={theme==='dark'?'lightskyblue':'grey'} sectionColor={theme==='dark'?'dodgerblue':'black'}
+                // onPointerDown={()=>setSelect(null)}
             />
 
             <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 0]} receiveShadow>
@@ -759,6 +821,7 @@ function Scene({
                                 key: item.id, item,
                                 isSelected: item.id === selectedId,
                                 onSelect: setSelectedId, 
+                                onPick: (obj)=>setSelect(obj),
                                 // mode: transformMode,
                                 // onDraggingChange: setIsDragging,
                                 // onChangeTransform: onTransformChange,
@@ -798,17 +861,30 @@ function Scene({
                 </Select>
             </Suspense>     
 
-            <GizmoHelper alignment="bottom-right" margin={[100, 100]}>
+            <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
                 <GizmoViewport 
-                    axisHeadScale={1} labelColor={'white'}
+                    axisHeadScale={1} 
                     axisColors={['red', 'green', 'blue']} 
                 />
             </GizmoHelper>
 
+            {/* TransformControls (attach/detach via ref) */}
+            {(selected && select!==null) && <TransformControls
+                ref={tctrl}
+                args={[camera, gl.domElement]}
+                mode={mode}
+                onDraggingChange={(dragging) => setIsDragging(dragging)}
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+            />}
+
+            {/* Box helper for selected */}
+            {selected && <SelectedBoxHelper target={select} />}
+
             {/* Orbit controls (disabled while dragging gizmo) */}
             <OrbitControls
                 makeDefault
-                // enabled={!isDragging}
+                enabled={!isDragging}
                 target={selected ? selected.position : [0, 0, 0]}
             />
         </>
@@ -820,7 +896,7 @@ let nextId = 1;
 export default function ThreeEditorPage() {
     const [objects, setObjects] = useState([]);
     const [selectedId, setSelectedId] = useState(0);
-    // const [transformMode, setTransformMode] = useState("translate"); // translate | rotate | scale
+    const [transformMode, setTransformMode] = useState("translate"); // translate | rotate | scale
     
     const fileInputRef1 = useRef(null);
     const fileInputRef2 = useRef(null);
@@ -1525,6 +1601,20 @@ export default function ThreeEditorPage() {
 
             {/* -------------------------- Right Panel (3D) ------------------------ */}
             <div className="w-[70%] flex flex-1">
+                <div className="absolute top-[12.5vh] left-[50vw] flex flex-row justify-evenly gap-3 z-20">
+                    <div className="border-2 rounded-3xl p-[5px]" onClick={()=>setTransformMode('translate')}>
+                        <Move3d />
+                    </div>
+
+                    <div className="border-2 rounded-3xl p-[5px]" onClick={()=>setTransformMode('rotate')}>
+                        <Rotate3d />
+                    </div>
+
+                    <div className="border-2 rounded-3xl p-[5px]" onClick={()=>setTransformMode('scale')}>
+                        <Scale3d />
+                    </div>
+                </div>
+
                 <Canvas
                     shadows dpr={[1, 2]}
                     camera={{ position: [6, 6, 6], fov: 45 }}
@@ -1532,7 +1622,7 @@ export default function ThreeEditorPage() {
                 >
                     <Scene
                         objects={objects} selectedId={selectedId} ref={groupRef}
-                        setSelectedId={setSelectedId} theme={theme} 
+                        setSelectedId={setSelectedId} theme={theme} mode={transformMode}
                     />
                 </Canvas>
             </div>

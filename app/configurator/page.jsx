@@ -12,6 +12,9 @@ import { Cup } from './cecanvas';
 import SOverlay from './soverlay';
 import { Shoe } from './scanvas';
 import Overlay from "./overlay";
+import { BeanBag } from "./bcanvas";
+import BOverlay from "./boverlay";
+
 import { state } from "./store";
 
 import './index.css';
@@ -20,7 +23,7 @@ export default function configurator(){
     const snap = useSnapshot(state);
 
     const [idx, setIdx] = useState(0)
-    const cArr = ['shirt', 'cap', 'shoe', 'cup'];
+    const cArr = ['shirt', 'cap', 'shoe', 'cup', 'beanbag', ];
 
     const handleBack = (indx) => {
         if(indx>0){
@@ -76,6 +79,16 @@ export default function configurator(){
                 <Cup />
 
                 <CeOverlay />
+            </div>}
+
+            {snap.title === 'beanbag' && <div className="border border-b-3 rounded-xl h-[50vh] bg-[#33333350] dark:bg-[#ffffff50]">
+                <BeanBag />
+
+                <BOverlay />
+            </div>}
+
+            {snap.title === '' && <div className="flex justify-center items-center h-[50vh]">
+                <p className="text-2xl font-semibold"> Select a product to customize </p>
             </div>}
         </>
     );

@@ -6,6 +6,7 @@ export const state = proxy({
   colors: ['#ccc', '#efbd4e', '#80c670', '#726de8', '#ef674e', '#353934'],
   cupdecals: ['react', 'three', 'starbucks', 'mcdonalds', 'onepiece'],
   shirtdecals: ['react', 'three', 'onepiece'],
+  bean: ['leatherbrown', 'carrybag', 'denimblack', 'denimblue', 'leatherjacket', 'denimlightblue'],
   color: '#efbd4e',
   shirtdecal: 'react',
   cupdecal: 'starbucks',
@@ -20,4 +21,5 @@ export const state = proxy({
   cap: "#cccccc",
   plastic: "#333333",
   cup: '#ffffff',
+  beanbag: 'leatherbrown',
 });

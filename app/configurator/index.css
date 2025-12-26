@@ -180,7 +180,7 @@ canvas {
 
 .decals img {
     width: 25px;
-    height: auto;
+    height: 25px;
     /* filter: saturate(0) invert(1) brightness(5.5); */
     transition: all 0.2s ease-in-out;
 }

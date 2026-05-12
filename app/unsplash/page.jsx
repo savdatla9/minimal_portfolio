@@ -2,12 +2,13 @@
 
 import React from 'react';
 import axios from 'axios';
-// import { ImagePlay, ImageDown, Smartphone } from 'lucide-react';
+// import { Eye } from 'lucide-react';
 
 import { unsplashConfig } from '@/lib/firebase';
 
 export default function Unsplash(){
     const [page, setPage] = React.useState(1);
+    const [pLen, setPLen] = React.useState(0);
     const [load, setLoad] = React.useState(false);
     const [photoArr, setPArr] = React.useState([]);
 
@@ -16,7 +17,7 @@ export default function Unsplash(){
 
     const { url, user_name, public_key } = unsplashConfig;
 
-    const handlePage=()=>{
+    function handlePage(){
         setLoad(true);
 
         axios.get(`${url}users/${user_name}/photos?client_id=${public_key}&page=${page+1}&per_page=20&order_by=views`)
@@ -31,7 +32,8 @@ export default function Unsplash(){
 
         axios.get(`${url}users/${user_name}/photos?client_id=${public_key}&page=${page}&per_page=20&order_by=views`)
         .then((res) => { 
-            setPArr(res.data); setLoad(false);
+            setPArr(res.data); setLoad(false); 
+            setPLen(res.data[0].user.total_photos); 
         }).catch((err) => { console.log(err) });
     }, []);
 
@@ -46,20 +48,21 @@ export default function Unsplash(){
     return(
         <div>
             <h2 className='flex flex-row flex-wrap justify-center gap-6 p-4'> 
-                <div className='text-2xl -mt-1 font-semibold cursor-default'>UnSplash</div>
-                {/* <div onClick={changeOrder}>{order_by==='views' ? <ImageDown /> : <ImagePlay />}</div>  */}
-                {/* <div onClick={changeOrientation}>{orient==='portrait' ? <Smartphone /> : <Smartphone className='rotate-90' />}</div>  */}
+                <div className='text-2xl mt-0.5 font-stretch-75% cursor-default font italic underline'>Unsplash</div>
             </h2>
 
-            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 break-inside-avoid">
-                {photoArr.map((it) => <div key={it.id} className='rounded-[15px] m-2'>
-                    <img src={it.urls?.full} className='w-[250px] h-auto p-0.5 border-2 border-b-6 rounded-[15px]' />
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 justify-items-center">
+                {photoArr.map((it) => <div key={it.id} className="relative overflow-hidden rounded-2xl group">
+                    <img
+                        src={it.urls?.full} 
+                        className='w-[200px] h-auto p-0.5 border-2 border-b-6 rounded-[15px]'
+                    />
                 </div>)}
             </div>
 
-            <div className='flex flex-row justify-center mt-3'>
+            {pLen > photoArr.length && <div className='flex flex-row justify-center mt-3'>
                 <button className='text-xl p-3 border border-b-3 rounded-[15px]' onClick={() => handlePage()} disabled={load}>Load More</button>
-            </div>
+            </div>}
 
         </div>
     );

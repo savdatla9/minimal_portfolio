@@ -127,7 +127,7 @@ export default function App() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}><a href='/games' className='underline'> Back</a>&nbsp;&nbsp;Typing Speed Test Game</h1>
+      <h1 style={styles.title}><a href='/games' className='underline'>🏠︎</a>&nbsp;&nbsp;Typing Speed Test Game</h1>
 
       <div style={styles.topBar}>
         <Stat label="Time" value={timeLeft} />

@@ -6,7 +6,7 @@ const Games = () => {
         { title: 'Rock Paper Scissors Game', link: '/games/rps', icons: ' 🪨 📃 ✂️ ', is2d: true },
         { title: 'Speed Typing Game', link: '/games/typespeed', icons: '⌨️', is2d: true },
         { title: 'Card Flip Game', link: '/games/cardflip', icons: '🧩', is2d: true  },
-        { title: 'Snake Game 2D', link: '/games/snake', icons: '🐍', is2d: true },
+        // { title: 'Snake Game 2D', link: '/games/snake', icons: '🐍', is2d: true },
         { title: 'Whack A Hole Game', link: '/games/whackamole', icons: '🔨', is2d: true },
         { title: '2048 Puzzle Game', link: '/games/2048', icons: '🔢', is2d: true },
         { title: 'Guess Dice Number Game', link: '/games/diceroll', icons: '🎲', is2d: true },
@@ -24,6 +24,13 @@ const Games = () => {
                         onClick={() => window.location.href=it.link}
                     >
                         <b>{it.title}</b>
+                         
+                        {it.is2d===true ? <sup 
+                            className="font-bold text-md ml-1 italic"
+                            >2D</sup> : <sup 
+                            className="font-bold text-md ml-1 italic"
+                            >3D</sup>
+                        }
 
                         <p className="text-center mt-5 text-[28px]">{it.icons}</p>
                     </div>

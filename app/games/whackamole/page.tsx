@@ -166,7 +166,7 @@ export default function Page() {
     return (
         <div className="flex flex-col items-center justify-center p-6 gap-6">
             <header className="text-center">
-                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">Whack‑a‑Mole</h1>
+                <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight"><a href='/games' className='underline'>🏠︎</a>&nbsp;&nbsp;Whack‑a‑Mole</h1>
                 <p className="text-slate-400 mt-2 text-sm">Press <kbd className="px-1 py-0.5 rounded bg-slate-700">1‑9</kbd> to whack • <kbd className="px-1 py-0.5 rounded bg-slate-700">R</kbd> restart • <kbd className="px-1 py-0.5 rounded bg-slate-700">S</kbd> start/stop</p>
             </header>
 

@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sai Akhil Varma Datla - Personal Portfolio
 
-## Getting Started
+A modern, interactive, and feature-rich personal portfolio website built with **Next.js**, **React**, **Tailwind CSS**, and **Three.js**. This repository serves as a showcase of my professional experience as a Front-End Developer, highlighting technical skills, real-world web projects, interactive 3D configurators, and playable web games.
 
-First, run the development server:
+## ✨ Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Minimalist & Responsive Design**: Crafted with Tailwind CSS and Radix UI components for a clean, professional aesthetic that looks great on any device.
+- **Interactive 3D Experiences**: Integrates Three.js and React Three Fiber to showcase 3D product configurators and a custom 3D editor.
+- **Playable Mini-Games**: Includes built-in, fully playable web games like 2048, Snake, Flappy Bird, and a Reaction Timer to demonstrate complex state management and canvas rendering.
+- **Dynamic Content Sections**: Neatly organizes skills, work history, and a diverse list of professional B2B/B2C projects.
+- **Dark/Light Mode Ready**: Fully supports theming for customized viewing experiences.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠 Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: [Next.js](https://nextjs.org/) (App Router), React 19
+- **Styling & Animations**: Tailwind CSS, Radix UI, Framer Motion, AOS
+- **3D Graphics & AR**: Three.js, React Three Fiber, React Three Drei, Zappar WebXR
+- **State Management**: Zustand, Valtio
+- **Web3 & Blockchain**: Wagmi, Viem
+- **Other Tools**: Axios, Firebase, Howler.js (Audio), React Flow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Getting Started
 
-## Learn More
+To run this portfolio locally, follow these steps:
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/savdatla9/minimal_portfolio.git
+   cd minimalp
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-## Deploy on Vercel
+4. **View the site:**
+   Open [http://localhost:3000](http://localhost:3000) in your browser to see the portfolio in action.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📫 Contact
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Email**: [dsavarma.9@gmail.com](mailto:dsavarma.9@gmail.com)
+- **LinkedIn**: [Sai Akhil Varma Datla](https://www.linkedin.com/in/sai-akhil-varma-datla-051b3b158/)
+- **GitHub**: [@savdatla9](https://github.com/savdatla9/)

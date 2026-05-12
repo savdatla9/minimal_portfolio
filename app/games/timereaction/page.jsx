@@ -5,10 +5,18 @@ import { useEffect, useRef, useState } from "react";
 export default function ReactionTimer() {
   const [phase, setPhase] = useState("idle"); // idle | waiting | go | early | done
   const [message, setMessage] = useState("Click START, then wait for green.");
-  const [results, setResults] = useState(() => {
-    const saved = localStorage.getItem("rt-results");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [results, setResults] = useState([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("rt-results");
+      if (saved) {
+        setResults(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error("Failed to load results from localStorage", e);
+    }
+  }, []);
 
   const startRef = useRef(0);
 

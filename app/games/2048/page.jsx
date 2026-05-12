@@ -104,13 +104,25 @@ function anyMovesLeft(board) {
 };
 
 function useBestScore() {
-  const [best, setBest] = useState(() => {
-    const s = localStorage.getItem("best-2048");
-    return s ? Number(s) : 0;
-  });
+  const [best, setBest] = useState(0);
+
   useEffect(() => {
-    localStorage.setItem("best-2048", String(best));
+    try {
+      const s = localStorage.getItem("best-2048");
+      if (s) setBest(Number(s));
+    } catch (e) {
+      console.error("Failed to read best score from localStorage", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("best-2048", String(best));
+    } catch (e) {
+      console.error("Failed to write best score to localStorage", e);
+    }
   }, [best]);
+
   return [best, setBest];
 };
 

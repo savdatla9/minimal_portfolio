@@ -1,25 +1,25 @@
 'use client'
 
 import React from 'react';
-import { google } from '@ai-sdk/google';
+// import { google } from '@ai-sdk/google';
 
-import { generateText } from "ai";
+// import { generateText } from "ai";
 
 
-async function aiHandler(text) {
-  const { prompt } = await text.json();
+// async function aiHandler(text) {
+//   const { prompt } = await text.json();
 
-  // Choose a Google Gemini model
-  const model = google("gemini-2.5-flash");
+//   // Choose a Google Gemini model
+//   const model = google("gemini-2.5-flash");
 
-  const { text } = await generateText({
-    model,
-    prompt,
-    maxOutputTokens: 200,
-  });
+//   const { text } = await generateText({
+//     model,
+//     prompt,
+//     maxOutputTokens: 200,
+//   });
 
-  return Response.json({ text });
-};
+//   return text;
+// };
 
 export default function page(){
     return (

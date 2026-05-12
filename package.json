@@ -9,8 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.1",
-    "@ai-sdk/react": "^3.0.3",
     "@codesandbox/sandpack-react": "^2.20.0",
     "@codesandbox/sandpack-themes": "^2.0.21",
     "@ffmpeg/ffmpeg": "^0.12.15",
@@ -31,7 +29,6 @@
     "@xyflow/react": "^12.9.3",
     "@zappar/imagetraining": "^4.3.2",
     "@zappar/zappar-react-three-fiber": "^4.2.0",
-    "ai": "^6.0.3",
     "aos": "^2.3.4",
     "autoprefixer": "^10.4.21",
     "axios": "^1.13.2",

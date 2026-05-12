@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+// import React from 'react';
 // import { google } from '@ai-sdk/google';
 
 // import { generateText } from "ai";

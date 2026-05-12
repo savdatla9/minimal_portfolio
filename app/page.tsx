@@ -1,7 +1,8 @@
 "use client"
 
 import Link from 'next/link';
-import { Github, Linkedin, PanelsTopLeft, TabletSmartphone, BadgePlus } from 'lucide-react';
+import { Github, Linkedin, Instagram, PanelsTopLeft, TabletSmartphone, BadgePlus } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 import Section from "@/components/Section";
 import ContactForm from "@/components/ContactForm";
@@ -11,6 +12,7 @@ export default function Page() {
   const email = "dsavarma.9@gmail.com";
 
   const socials = [
+    { label: "Instagram", href: "https://www.instagram.com/d.s.a.v_/", },
     { label: "GitHub", href: "https://github.com/savdatla9/", },
     { label: "LinkedIn", href: "https://www.linkedin.com/in/sai-akhil-varma-datla-051b3b158/", },
   ];
@@ -24,7 +26,7 @@ export default function Page() {
     { name: "ATUM Life", desc: "E-commerce + Admin, For reusable & organic products.", isMobile: true, isWeb: true, link: 'https://atumlife.com/home', },
     { name: "Telangana Nijam", desc: "E-newspaper - Editorial Admin + User Portal.", isMobile: false, isWeb: true, link: 'https://epaper.telangananijam.com/', },
     { name: "Sand CRM", desc: "CRM for tracking vehicle, minerals transport.", isMobile: false, isWeb: true, link: '', },
-    { name: "Accelor8", desc: "A multi utility SaaS for retailers.", isMobile: false, isWeb: true, link: '', },
+    { name: "Accelr8", desc: "A multi utility SaaS for retailers.", isMobile: false, isWeb: true, link: '', },
     { name: "Rapidé nforce", desc: "B2B SAAS Platform for tracking orders.", isMobile: false, isWeb: true, link: '', },
   ];
 
@@ -68,23 +70,59 @@ export default function Page() {
     { name: 'TypeScript', rate: 60, isNew: true, icon: 'https://icons.veryicon.com/png/o/business/vscode-program-item-icon/typescript-def.png' },
     { name: 'Vue', rate: 35, isNew: true, icon: 'https://brandlogovector.com/wp-content/uploads/2021/12/Vue-Js-Logo-Small-150x150.png' },
     { name: 'Three Js', rate: 68, isNew: false, icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6eYPFwgeZwxd58aXqFwuhMF914MrfSPtqjQ&s' },
-    { name: 'React Js & React Native', rate: 90, isNew: false, icon: 'https://i.pinimg.com/736x/e3/68/6a/e3686af5908e06e5278158b626207d5f.jpg' },
+    { name: 'React Js', rate: 90, isNew: false, icon: 'https://i.pinimg.com/736x/e3/68/6a/e3686af5908e06e5278158b626207d5f.jpg' },
     // { name: 'Vite', rate: 80, isNew: false, icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Vitejs-logo.svg/2078px-Vitejs-logo.svg.png' },
     { name: 'Next Js', rate: 40, isNew: true, icon: 
       // 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV9uzErWz9EXqZDxZ5lP9aYpMz8eK6rr5X3w&s' 
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwIy-mzDNwEgiWKpwsy_8CK9KSr6GEnCcpgQ&s"
     },
     { name: 'Nuxt', rate: 38, isNew: true, icon: 'https://nuxt.com/assets/design-kit/icon-green.svg' },
+    { name: 'WebXR', rate: 78, isNew: false, icon: 'https://avatars.githubusercontent.com/u/34385910?s=280&v=4' },
+    { name: 'React Native', rate: 40, isNew: false, icon: 'https://i.pinimg.com/736x/e3/68/6a/e3686af5908e06e5278158b626207d5f.jpg' },
     { name: 'Firebase', rate: 80, isNew: false, icon: 'https://pnghdpro.com/wp-content/themes/pnghdpro/download/social-media-and-brands/google-firebase-logo-icon-hd.png' },
     { name: 'Node Js', rate: 65, isNew: false, icon: 'https://www.freepnglogos.com/uploads/javascript-png/javascript-nodejs-logo-27.png' },
     { name: 'Express Js', rate: 63, isNew: true, icon: 'https://www.peanutsquare.com/wp-content/uploads/2024/04/Express.png' },
-    { name: 'WebXR', rate: 78, isNew: false, icon: 'https://avatars.githubusercontent.com/u/34385910?s=280&v=4' },
   ];
 
   return (
-    <main>
-      {/* Hero */}
-      <Section id="about" anim="fade">
+    <main className="relative min-h-screen overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.6, 0.3],
+            x: [0, 100, 0],
+            y: [0, -50, 0],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 left-[-10%] w-96 h-96 bg-purple-500/30 rounded-full blur-[120px]"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.5, 1],
+            opacity: [0.2, 0.5, 0.2],
+            x: [0, -100, 0],
+            y: [0, 100, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-teal-500/20 rounded-full blur-[150px]"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.5, 0.3],
+            x: [0, 50, 0],
+            y: [0, 50, 0],
+          }}
+          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/3 left-1/3 w-[30rem] h-[30rem] bg-blue-500/20 rounded-full blur-[120px]"
+        />
+      </div>
+
+      <div className="relative z-10">
+        {/* Hero */}
+        <Section id="about" anim="fade">
         <div className="flex flex-col gap-4 py-4">
           <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight">
             {title}
@@ -92,35 +130,18 @@ export default function Page() {
 
           <p className="opacity-80">
             <b>Front End Developer</b> with 6 years of experience in designing and developing web apps using <b>React, Next Js, HTML, CSS, JS, TS, Tailwind CSS, Node Js & Three Js</b>.
-            Skilled in UI development, API integration <b>Axios - REST</b> and deployment on AWS - Amplify Vercel & GoDaddy.<br /><br />
+            Skilled in UI development, API integration <b>Axios & Fetch API - REST</b> and deployment on <b>AWS - Amplify, Vercel, GoDaddy</b>.<br /><br />
             Hands-on with <strong> Firebase, Chart Js, Paytm Payment Gateway, React Three Fiber & WebXR</strong>, State Management - <b>Redux, Context</b>.
             Strong understanding of SDLC, agile delivery and troubleshooting. 
             Certification in <b><a href='https://www.linkedin.com/learning/certificates/be20676aa26f443ea107c4633d9b52c60ef8142227349fd4d7a879eb3154cc61' target="_blank">React Js</a> & <a href='https://threejs-journey.com/certificate/view/13686' target="_blank">Three Js</a></b>.<br />
           </p>
-          
-          {/* <div className="flex gap-2">
-            <a
-              href="#contact"
-              className="rounded-xl border-solid px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-900"
-            >
-              Contact me
-            </a>
-
-            <a
-              href={`mailto:${email}`}
-              className="rounded-xl border-solid px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-900"
-            >
-              Email
-            </a>
-          </div> */}
 
           <ul className="flex flex-row justify-center gap-9 dark:bg-[#ffffff15] w-[200px] rounded-[25px] bg-[#00000015]">
             {socials.map((s) => (
               <li key={s.label} className="pt-5">
                 <a className="hover:underline" href={s.href} target="_blank">
-                  {s.label=='GitHub' ? <Github size={30} /> : <Linkedin size={30} />}
+                  {s.label==='GitHub' ? <Github size={30} /> : s.label==='LinkedIn' ? <Linkedin size={30} /> : <Instagram size={30} />}
                 </a>&nbsp;&nbsp;&nbsp;
-                {/* <Button variant="secondary" onClick={() => window.location.href=s.href}>{s.icon}</Button> */}
               </li>
             ))}
           </ul>
@@ -149,17 +170,19 @@ export default function Page() {
         <h2 className="text-xl font-semibold mb-6">Experience</h2>
         <div className="relative border-l border-neutral-200 dark:border-neutral-800 ml-3 mb-12">
           {experiences.map((exp, idx) => (
-            <div key={idx} className="mb-8 pl-6 relative">
-              <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-neutral-400 dark:bg-neutral-600 ring-4 ring-white dark:ring-[#0a0a0a]"></span>
-              <h3 className="font-semibold text-lg">{exp.role}</h3>
-              <div className="flex flex-col sm:flex-row sm:items-center text-sm text-neutral-500 dark:text-neutral-400 mb-2 gap-1 sm:gap-2">
-                <span className="font-medium text-neutral-700 dark:text-neutral-300">{exp.company}</span>
-                <span className="hidden sm:inline">•</span>
-                <span>{exp.duration}</span>
+            <div key={idx} className="mb-8 pl-6 relative group cursor-default" data-aos="fade-left" data-aos-delay={idx * 150}>
+              <span className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-neutral-400 dark:bg-neutral-600 ring-4 ring-white dark:ring-[#0a0a0a] transition-all duration-300 group-hover:scale-150 group-hover:bg-neutral-900 dark:group-hover:bg-neutral-100"></span>
+              <div className="transition-transform duration-300 group-hover:translate-x-2">
+                <h3 className="font-semibold text-lg transition-colors group-hover:underline group-hover:text-black dark:group-hover:text-white group-focus:underline group-focus:text-black dark:group-focus:text-white">{exp.role}</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center text-sm text-neutral-500 dark:text-neutral-400 mb-2 gap-1 sm:gap-2">
+                  <span className="font-medium text-neutral-700 dark:text-neutral-300">{exp.company}</span>
+                  <span className="hidden sm:inline">•</span>
+                  <span>{exp.duration}</span>
+                </div>
+                {/* <p className="text-neutral-600 dark:text-neutral-400 text-sm">
+                  {exp.description}
+                </p> */}
               </div>
-              {/* <p className="text-neutral-600 dark:text-neutral-400 text-sm">
-                {exp.description}
-              </p> */}
             </div>
           ))}
         </div>
@@ -246,6 +269,7 @@ export default function Page() {
 
         <ContactForm />
       </Section>
+      </div>
     </main>
   );
 };

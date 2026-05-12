@@ -51,13 +51,36 @@ export default function Unsplash(){
                 <div className='text-2xl mt-0.5 font-stretch-75% cursor-default font italic underline'>Unsplash</div>
             </h2>
 
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4 justify-items-center">
-                {photoArr.map((it) => <div key={it.id} className="relative overflow-hidden rounded-2xl group">
-                    <img
-                        src={it.urls?.full} 
-                        className='w-[200px] h-auto p-0.5 border-2 border-b-6 rounded-[15px]'
-                    />
-                </div>)}
+            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-6 px-4 max-w-[1600px] mx-auto">
+                {photoArr.map((it) => (
+                    <div key={it.id} className="break-inside-avoid mb-6 relative group inline-block w-full border-2 border-b-6 rounded-[15px] overflow-hidden bg-white dark:bg-zinc-900 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                        <div className="w-full overflow-hidden bg-zinc-100 dark:bg-zinc-800">
+                            <img
+                                src={it.urls?.regular || it.urls?.full} 
+                                alt={it.alt_description || "Unsplash Photo"}
+                                className='w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105'
+                                loading="lazy"
+                            />
+                        </div>
+                        <div className="p-3 flex items-center justify-between border-t-2">
+                            <div className="flex items-center gap-2 truncate pr-2">
+                                {it.user?.profile_image?.small && (
+                                    <img 
+                                        src={it.user.profile_image.small} 
+                                        alt={it.user.name} 
+                                        className="w-7 h-7 rounded-full border border-black/10 dark:border-white/10" 
+                                        loading="lazy"
+                                    />
+                                )}
+                                <span className="text-sm font-semibold truncate">{it.user?.name || 'Unsplash'}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 bg-black/5 dark:bg-white/10 rounded-full whitespace-nowrap">
+                                <span className="text-red-500">♥</span>
+                                <span>{it.likes || 0}</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {pLen > photoArr.length && <div className='flex flex-row justify-center mt-3'>

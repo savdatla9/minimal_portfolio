@@ -225,13 +225,13 @@ export default function Work() {
         <div className="w-16 h-1.5 bg-gradient-to-r from-teal-400 to-green-500 rounded-full mb-1"></div>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <Link href="/unsplash" className="group rounded-[2rem] border border-neutral-200 dark:border-neutral-800 p-8 hover:bg-neutral-50 dark:hover:bg-[#ffffff08] transition-all hover:shadow-lg relative overflow-hidden">
+          <Link href="/editor3D" className="group rounded-[2rem] border border-neutral-200 dark:border-neutral-800 p-8 hover:bg-neutral-50 dark:hover:bg-[#ffffff08] transition-all hover:shadow-lg relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <h3 className="text-xl font-bold mb-2 flex items-center justify-between">
-              Unsplash Photos
+              3D Editor
               <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform text-neutral-400 group-hover:text-purple-500" />
             </h3>
-            <p className="text-neutral-500 text-sm">My Hobby - Photography</p>
+            <p className="text-neutral-500 text-sm">A simple 3D editor using Three.js</p>
           </Link>
           
           <Link href="/games" className="group rounded-[2rem] border border-neutral-200 dark:border-neutral-800 p-8 hover:bg-neutral-50 dark:hover:bg-[#ffffff08] transition-all hover:shadow-lg relative overflow-hidden">

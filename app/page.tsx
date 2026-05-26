@@ -72,10 +72,7 @@ export default function Page() {
     { name: 'Three Js', rate: 68, isNew: false, icon: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6eYPFwgeZwxd58aXqFwuhMF914MrfSPtqjQ&s' },
     { name: 'React Js', rate: 90, isNew: false, icon: 'https://i.pinimg.com/736x/e3/68/6a/e3686af5908e06e5278158b626207d5f.jpg' },
     // { name: 'Vite', rate: 80, isNew: false, icon: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Vitejs-logo.svg/2078px-Vitejs-logo.svg.png' },
-    { name: 'Next Js', rate: 40, isNew: true, icon: 
-      // 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV9uzErWz9EXqZDxZ5lP9aYpMz8eK6rr5X3w&s' 
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwIy-mzDNwEgiWKpwsy_8CK9KSr6GEnCcpgQ&s"
-    },
+    { name: 'Next Js', rate: 40, isNew: true, icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQwIy-mzDNwEgiWKpwsy_8CK9KSr6GEnCcpgQ&s" },
     { name: 'Nuxt', rate: 38, isNew: true, icon: 'https://nuxt.com/assets/design-kit/icon-green.svg' },
     { name: 'WebXR', rate: 78, isNew: false, icon: 'https://avatars.githubusercontent.com/u/34385910?s=280&v=4' },
     { name: 'React Native', rate: 40, isNew: false, icon: 'https://i.pinimg.com/736x/e3/68/6a/e3686af5908e06e5278158b626207d5f.jpg' },
@@ -86,39 +83,7 @@ export default function Page() {
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.3, 0.6, 0.3],
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-0 left-[-10%] w-96 h-96 bg-purple-500/30 rounded-full blur-[120px]"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.5, 1],
-            opacity: [0.2, 0.5, 0.2],
-            x: [0, -100, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-10%] right-[-10%] w-[40rem] h-[40rem] bg-teal-500/20 rounded-full blur-[150px]"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.1, 1],
-            opacity: [0.3, 0.5, 0.3],
-            x: [0, 50, 0],
-            y: [0, 50, 0],
-          }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/3 left-1/3 w-[30rem] h-[30rem] bg-blue-500/20 rounded-full blur-[120px]"
-        />
-      </div>
+
 
       <div className="relative z-10">
         {/* Hero */}
@@ -210,11 +175,11 @@ export default function Page() {
             key={projects.length}
             className="rounded-2xl border border-b-4 p-4 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition"
           >
-            <h3 className="font-medium flex flex-row justify-between"><div>Unsplash Photos</div> <div className="flex flex-row"><PanelsTopLeft /></div></h3>
+            <h3 className="font-medium flex flex-row justify-between"><div>Code Base</div> <div className="flex flex-row"><PanelsTopLeft /></div></h3>
 
-            <p className="text-sm opacity-75">My Hobby - Photography</p>
+            <p className="text-sm opacity-75">Coding Sandbox with Multiple Frames</p>
 
-            <Link href='/unsplash'>View Live</Link>
+            <Link href='/codes'>View Live</Link>
           </article>
 
           <article

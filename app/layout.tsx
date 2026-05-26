@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Header from "@/components/header.jsx";
 import Footer from "@/components/footer";
+import AnimatedBackground from "@/components/AnimatedBackground";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <AnimatedBackground />
           <Header name={'S A V D'} />
           {children}
           <Footer name={'S A V D'} />
@@ -49,4 +51,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-};
+}

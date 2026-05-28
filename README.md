@@ -16,7 +16,7 @@ A modern, interactive, and feature-rich personal portfolio website built with **
 - **Styling & Animations**: Tailwind CSS, Radix UI, Framer Motion, AOS
 - **3D Graphics & AR**: Three.js, React Three Fiber, React Three Drei, Zappar WebXR
 - **State Management**: Zustand, Valtio
-- **Web3 & Blockchain**: Wagmi, Viem
+- `**Web3 & Blockchain**: Wagmi, Viem`
 - **Other Tools**: Axios, Firebase, Howler.js (Audio), React Flow
 
 ## 🚀 Getting Started

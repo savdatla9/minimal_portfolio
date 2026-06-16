@@ -3,6 +3,7 @@
 const Games = () => {
     const pageArr = [
         { title: 'Tic Tac Toc Game', link: '/games/xo', icons: 'XO', is2d: true },
+        { title: 'Chess Game 2D', link: '/games/chess', icons: '♟️', is2d: true },
         { title: 'Rock Paper Scissors Game', link: '/games/rps', icons: ' 🪨 📃 ✂️ ', is2d: true },
         { title: 'Speed Typing Game', link: '/games/typespeed', icons: '⌨️', is2d: true },
         { title: 'Card Flip Game', link: '/games/cardflip', icons: '🧩', is2d: true  },

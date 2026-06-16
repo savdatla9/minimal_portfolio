@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "firebase": "^12.5.0",
     "framer-motion": "^12.23.24",
+    "gsap": "^3.15.0",
     "howler": "^2.2.4",
     "iconsax-react": "^0.0.8",
     "lucide-react": "^0.552.0",

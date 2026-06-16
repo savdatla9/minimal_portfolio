@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ref, listAll, getDownloadURL, getMetadata } from 'firebase/storage';
 import { storage } from '@/lib/firebase';
-import { Camera, MapPin, Loader2, Maximize2, X, Info } from 'lucide-react';
+import { Camera, MapPin, Loader2, Maximize2, X, Info, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import gsap from 'gsap';
 
 export default function Photos() {
   const [works, setWorks] = useState([]);
@@ -13,8 +14,9 @@ export default function Photos() {
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isBlurred, setIsBlurred] = useState(false);
+  const containerRef = useRef(null);
 
-  const LIMIT = 12;
+  const LIMIT = 15;
 
   // Fetch photos and metadata directly from Firebase Storage photography/ folder
   const fetchPhotos = async () => {
@@ -98,10 +100,70 @@ export default function Photos() {
     };
   }, []);
 
+  // --- GSAP Pagination Entrance Animation ---
+  useEffect(() => {
+    if (loading || works.length === 0) return;
+
+    // Target the newly rendered photo cards
+    const cards = containerRef.current?.querySelectorAll('.photo-card');
+    if (!cards || cards.length === 0) return;
+
+    // Kill any active GSAP tweens on these elements to avoid overlap/glitches
+    gsap.killTweensOf(cards);
+
+    // Initial state: invisible and offset on both X and Y axes
+    gsap.set(cards, { opacity: 0, y: 40, x: -20 });
+
+    // Animate in: staggered slide & fade-in
+    gsap.to(cards, {
+      opacity: 1,
+      y: 0,
+      x: 0,
+      duration: 0.6,
+      stagger: 0.05,
+      ease: 'power2.out',
+      clearProps: 'transform,opacity', // Clear styles so hover transitions work correctly afterwards
+    });
+  }, [currentPage, loading, works.length]);
+
   // Pagination calculations
   const totalPages = Math.ceil(works.length / LIMIT);
   const startIndex = (currentPage - 1) * LIMIT;
   const paginatedWorks = works.slice(startIndex, startIndex + LIMIT);
+
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1);
+      if (currentPage > 3) {
+        pages.push('...');
+      }
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      let adjustedStart = start;
+      let adjustedEnd = end;
+      if (currentPage <= 3) {
+        adjustedEnd = 4;
+      } else if (currentPage >= totalPages - 2) {
+        adjustedStart = totalPages - 3;
+      }
+
+      for (let i = adjustedStart; i <= adjustedEnd; i++) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push('...');
+      }
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   return (
     <main className={`relative min-h-screen pb-20 pt-4 text-zinc-100 flex flex-col items-center transition-all duration-300 ${isBlurred ? 'blur-xl select-none pointer-events-none' : ''}`}>
@@ -126,12 +188,12 @@ export default function Photos() {
         ) : (
           <>
             {/* --- Masonry Gallery Grid --- */}
-            <div className="columns-1 sm:columns-2 md:columns-3 gap-6 w-full">
+            <div ref={containerRef} className="columns-1 sm:columns-2 md:columns-3 gap-6 w-full">
               {paginatedWorks.map((it) => (
                 <div 
                   key={it.id} 
                   onClick={() => setSelectedPhoto(it)}
-                  className="break-inside-avoid mb-6 relative group block w-full rounded-2xl overflow-hidden bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
+                  className="photo-card break-inside-avoid mb-6 relative group block w-full rounded-2xl overflow-hidden bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl cursor-pointer"
                 >
                   {/* Image Wrap */}
                   <div className="w-full relative overflow-hidden bg-zinc-900 aspect-auto">
@@ -155,7 +217,21 @@ export default function Photos() {
 
             {/* --- Pagination Controls --- */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4 mt-8 px-4 py-2 rounded-2xl bg-zinc-900/35 border border-zinc-850/60 backdrop-blur-md">
+              <div className="flex items-center justify-center gap-2 mt-8 px-4 py-2 rounded-2xl bg-zinc-900/35 border border-zinc-850/60 backdrop-blur-md">
+                <Button
+                  onClick={() => {
+                    setCurrentPage(1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  disabled={currentPage === 1}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-lg bg-zinc-950/50 border-zinc-800 hover:bg-zinc-900 text-zinc-300 disabled:opacity-40 disabled:hover:bg-zinc-950/50 transition-all cursor-pointer"
+                  aria-label="First Page"
+                >
+                  <ChevronsLeft className="w-4 h-4" />
+                </Button>
+
                 <Button
                   onClick={() => {
                     setCurrentPage(prev => Math.max(prev - 1, 1));
@@ -164,13 +240,43 @@ export default function Photos() {
                   disabled={currentPage === 1}
                   variant="outline"
                   size="sm"
-                  className="h-8 px-3 rounded-lg text-xs font-semibold bg-zinc-950/50 border-zinc-800 hover:bg-zinc-900 text-zinc-300 disabled:opacity-40 disabled:hover:bg-zinc-950/50 transition-all cursor-pointer"
+                  className="h-8 w-8 p-0 rounded-lg bg-zinc-950/50 border-zinc-800 hover:bg-zinc-900 text-zinc-300 disabled:opacity-40 disabled:hover:bg-zinc-950/50 transition-all cursor-pointer"
+                  aria-label="Previous Page"
                 >
-                  Previous
+                  <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <span className="text-xs font-semibold text-black-300 dark:text-zinc-400 font-mono">
-                  Page {currentPage} / {totalPages}
-                </span>
+
+                <div className="flex items-center gap-1">
+                  {getPageNumbers().map((page, idx) => {
+                    if (page === '...') {
+                      return (
+                        <span key={`dots-${idx}`} className="px-2 text-zinc-500 font-mono select-none">
+                          ...
+                        </span>
+                      );
+                    }
+                    const isActive = page === currentPage;
+                    return (
+                      <Button
+                        key={page}
+                        onClick={() => {
+                          setCurrentPage(page);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        variant={isActive ? "default" : "outline"}
+                        size="sm"
+                        className={`h-8 w-8 p-0 rounded-lg text-xs font-semibold font-mono transition-all cursor-pointer ${
+                          isActive
+                            ? "bg-zinc-100 text-zinc-950 hover:bg-zinc-200 border-zinc-100 shadow-lg"
+                            : "bg-zinc-950/50 border-zinc-800 hover:bg-zinc-900 text-zinc-300"
+                        }`}
+                      >
+                        {page}
+                      </Button>
+                    );
+                  })}
+                </div>
+
                 <Button
                   onClick={() => {
                     setCurrentPage(prev => Math.min(prev + 1, totalPages));
@@ -179,9 +285,24 @@ export default function Photos() {
                   disabled={currentPage === totalPages}
                   variant="outline"
                   size="sm"
-                  className="h-8 px-3 rounded-lg text-xs font-semibold bg-zinc-950/50 border-zinc-800 hover:bg-zinc-900 text-zinc-300 disabled:opacity-40 disabled:hover:bg-zinc-950/50 transition-all cursor-pointer"
+                  className="h-8 w-8 p-0 rounded-lg bg-zinc-950/50 border-zinc-800 hover:bg-zinc-900 text-zinc-300 disabled:opacity-40 disabled:hover:bg-zinc-950/50 transition-all cursor-pointer"
+                  aria-label="Next Page"
                 >
-                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    setCurrentPage(totalPages);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  disabled={currentPage === totalPages}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-8 p-0 rounded-lg bg-zinc-950/50 border-zinc-800 hover:bg-zinc-900 text-zinc-300 disabled:opacity-40 disabled:hover:bg-zinc-950/50 transition-all cursor-pointer"
+                  aria-label="Last Page"
+                >
+                  <ChevronsRight className="w-4 h-4" />
                 </Button>
               </div>
             )}

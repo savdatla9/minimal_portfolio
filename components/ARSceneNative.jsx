@@ -237,6 +237,7 @@ function ARManager({ activeModel, onTrackingChanged }) {
         if (trackingState !== 'lost' && foundPose) {
           groupRef.current.matrix.fromArray(foundPose.transform.matrix);
           groupRef.current.matrixAutoUpdate = false;
+          groupRef.current.updateMatrixWorld(true); // Force world transform recalculation
           groupRef.current.visible = true;
 
           // Fade materials when in emulated state (as defined in W3C WebXR Image Tracking DRAFT)
@@ -287,6 +288,8 @@ export default function ARSceneNative() {
   const [inAR, setInAR] = useState(false);
   const [isTracking, setIsTracking] = useState('lost'); // 'tracked' | 'emulated' | 'lost'
   const [activeModel, setActiveModel] = useState('react-logo');
+  const [activeTarget, setActiveTarget] = useState('react'); // 'react' | 'starbucks' | 'onepiece' | 'photo'
+  const [targetScore, setTargetScore] = useState('unknown'); // 'trackable' | 'untrackable' | 'unknown'
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState('');
@@ -346,15 +349,20 @@ export default function ARSceneNative() {
     try {
       setLoading(true);
       setError(null);
+      setTargetScore('unknown');
 
-      // 1. Fetch & decode the target image
+      // 1. Fetch & decode the target image dynamically
+      const targetPath = activeTarget === 'starbucks' ? '/starbucks.png'
+                       : activeTarget === 'onepiece' ? '/onepiece.png'
+                       : activeTarget === 'photo' ? '/CDSC_0433.jpg'
+                       : '/react.png';
+
       const img = new Image();
-      img.src = '/react.png';
+      img.src = targetPath;
       await img.decode();
       const imageBitmap = await createImageBitmap(img);
 
       // 2. Request XR Session with DOM Overlay and Image Tracking
-      // 2. Request XR Session with DOM Overlay and Image Tracking as optional features
       const session = await navigator.xr.requestSession('immersive-ar', {
         requiredFeatures: [],
         optionalFeatures: ['image-tracking', 'dom-overlay'],
@@ -377,12 +385,18 @@ export default function ARSceneNative() {
         try {
           const scores = await session.getTrackedImageScores();
           console.log("WebXR Target Image scores:", scores);
-          if (scores && scores[0] === 'untrackable') {
-            setError("Warning: Target image is untrackable. The system may fail to recognize it.");
+          if (scores && scores.length > 0) {
+            setTargetScore(scores[0]);
+            if (scores[0] === 'untrackable') {
+              setError("Warning: Selected target image is untrackable. The AR engine may fail to detect it. Try the Starbucks or One Piece logo instead.");
+            }
           }
         } catch (scoreErr) {
           console.warn("Failed to retrieve image tracking scores:", scoreErr);
+          setTargetScore('error');
         }
+      } else {
+        setTargetScore('unsupported');
       }
 
       setInAR(true);
@@ -512,8 +526,29 @@ export default function ARSceneNative() {
               <Scan className="text-[#00f3ff]" /> Target Image
             </h2>
             <p className="text-neutral-400 text-sm leading-relaxed max-w-xl">
-              Point your compatible AR camera at this React logo. When detected, the 3D model will overlay and align itself directly to this image.
+              Point your compatible AR camera at the selected target. WebXR will overlay the 3D model directly on top of it.
             </p>
+
+            {/* Target Image Selector */}
+            <div className="space-y-2">
+              <label className="text-xs text-neutral-400 font-semibold uppercase tracking-wider">Select AR Tracking Target:</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-zinc-950 p-1.5 rounded-xl border border-white/5">
+                {[
+                  { id: 'react', label: 'React (Symmetric)' },
+                  { id: 'starbucks', label: 'Starbucks (Detail)' },
+                  { id: 'onepiece', label: 'One Piece (High-Cont)' },
+                  { id: 'photo', label: 'Photo Card (Max)' }
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setActiveTarget(t.id)}
+                    className={`py-2 px-1 rounded-lg text-xs font-semibold transition ${activeTarget === t.id ? 'bg-[#00f3ff] text-zinc-950 shadow-[0_0_12px_rgba(0,243,255,0.4)]' : 'text-neutral-400 hover:text-white'}`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Glowing Scan Container */}
             <div className="relative border border-[#00f3ff]/20 bg-zinc-950/60 rounded-2xl p-8 flex items-center justify-center group overflow-hidden max-w-md mx-auto w-full aspect-square">
@@ -527,14 +562,17 @@ export default function ARSceneNative() {
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#00f3ff] to-transparent shadow-[0_0_12px_#00f3ff] animate-[scan_3s_ease-in-out_infinite] pointer-events-none"></div>
 
               <img 
-                src="/react.png" 
+                src={activeTarget === 'starbucks' ? '/starbucks.png'
+                   : activeTarget === 'onepiece' ? '/onepiece.png'
+                   : activeTarget === 'photo' ? '/CDSC_0433.jpg'
+                   : '/react.png'} 
                 alt="AR Target" 
                 className="w-56 h-56 object-contain filter drop-shadow-[0_0_30px_rgba(0,243,255,0.15)] group-hover:scale-105 transition-transform duration-500" 
               />
             </div>
             
             <p className="text-center text-xs text-neutral-500 italic">
-              Scanning target image (react.png)
+              Scanning target image ({activeTarget === 'starbucks' ? 'starbucks.png' : activeTarget === 'onepiece' ? 'onepiece.png' : activeTarget === 'photo' ? 'CDSC_0433.jpg' : 'react.png'})
             </p>
           </div>
         </section>
@@ -845,8 +883,12 @@ export default function ARSceneNative() {
           >
             <ArrowLeft size={16} /> Exit AR
           </button>
-          <div className="bg-black/70 text-white/90 border border-white/10 px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-mono">
-            WebXR AR
+          <div className="bg-black/70 text-white/90 border border-white/10 px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-mono flex items-center gap-1.5">
+            <span>WebXR AR</span>
+            <span className="text-white/25">|</span>
+            <span className={targetScore === 'trackable' ? 'text-emerald-400 font-bold' : targetScore === 'untrackable' ? 'text-rose-400 font-bold animate-pulse' : 'text-amber-400 font-bold'}>
+              Target: {targetScore.toUpperCase()}
+            </span>
           </div>
         </div>
 
@@ -858,7 +900,7 @@ export default function ARSceneNative() {
                 <Scan size={48} className="text-[#00f3ff] animate-ping" />
               </div>
               <p className="text-[#00f3ff] font-medium text-center text-sm drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] bg-zinc-950/80 px-4 py-1.5 rounded-full border border-[#00f3ff]/20">
-                Point camera at React Logo
+                Point camera at {activeTarget === 'react' ? 'React Logo' : activeTarget === 'starbucks' ? 'Starbucks Logo' : activeTarget === 'onepiece' ? 'One Piece Logo' : 'Photo Card'}
               </p>
             </div>
           ) : isTracking === 'emulated' ? (

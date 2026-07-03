@@ -2,8 +2,8 @@
 
 import dynamic from 'next/dynamic';
 
-// Dynamically import the AR component to prevent server-side rendering errors with WebXR
-const ARSceneNative = dynamic(() => import('@/components/ARSceneNative'), {
+// Dynamically import the AR component to prevent server-side rendering errors with AR.js
+const ARSceneARJS = dynamic(() => import('@/components/ARSceneARJS'), {
   ssr: false,
   loading: () => (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col items-center justify-center font-sans">
@@ -16,5 +16,5 @@ const ARSceneNative = dynamic(() => import('@/components/ARSceneNative'), {
 });
 
 export default function ARPage() {
-  return <ARSceneNative />;
+  return <ARSceneARJS />;
 }

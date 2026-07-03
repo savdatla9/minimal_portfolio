@@ -78,13 +78,11 @@ export default function Page() {
     { name: 'React Native', rate: 40, isNew: false, icon: 'https://i.pinimg.com/736x/e3/68/6a/e3686af5908e06e5278158b626207d5f.jpg' },
     { name: 'Firebase', rate: 80, isNew: false, icon: 'https://pnghdpro.com/wp-content/themes/pnghdpro/download/social-media-and-brands/google-firebase-logo-icon-hd.png' },
     { name: 'Node Js', rate: 65, isNew: false, icon: 'https://www.freepnglogos.com/uploads/javascript-png/javascript-nodejs-logo-27.png' },
-    { name: 'Express Js', rate: 63, isNew: true, icon: 'https://www.peanutsquare.com/wp-content/uploads/2024/04/Express.png' },
+    { name: 'Express Js', rate: 63, isNew: true, icon: 'https://www.manektech.com/storage/developer/1646733543.webp' },
   ];
 
   return (
     <main className="relative min-h-screen overflow-hidden">
-
-
       <div className="relative z-10">
         {/* Hero */}
         <Section id="about" anim="fade">
@@ -219,9 +217,9 @@ export default function Page() {
             key={projects.length+4}
             className="rounded-2xl border border-b-4 p-4 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition"
           >
-            <h3 className="font-medium flex flex-row justify-between"><div>Native WebXR AR</div> <div className="flex flex-row"><PanelsTopLeft /></div></h3>
+            <h3 className="font-medium flex flex-row justify-between"><div>AR/WebXR</div> <div className="flex flex-row"><PanelsTopLeft /></div></h3>
 
-            <p className="text-sm opacity-75">AR Image Tracking using native WebXR Device API</p>
+            <p className="text-sm opacity-75">Marker-based & Location-based AR using AR.js and A-Frame</p>
 
             <Link href='/ar'>View Live</Link>
           </article>
